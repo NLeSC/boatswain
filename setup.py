@@ -17,16 +17,17 @@ def read(*names, **kwargs):
 readme = open('README.rst').read()
 history = open('CHANGES.rst').read().replace('.. :changelog:', '')
 
-
 setup(
     name='boatswain',
-    version='0.1.0-dev',
+    version='0.1.0.dev1',
     url='https://github.com/nlesc-sherlock/boatswain',
     license='Apache Software License',
     author='Berend Weel',
-    tests_require=['nose'],
+    tests_require=['pytest'],
     install_requires=[
-        'docker>=2.0.2, <3.0.0'
+        'docker>=2.0.2, <3.0.0',
+        'PyYAML>=3.12, <4.0',
+        'progressbar2>=3.12.0, <4.0.0'
     ],
     extras_require={
         'registry': ['docker-registry-client>=0.5.1'],
@@ -41,11 +42,13 @@ setup(
     platforms='any',
     classifiers=[
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7.13',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'Development Status :: 4 - Beta',
+        'Development Status :: 3 - Alpha',
         'Natural Language :: English',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',

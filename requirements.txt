@@ -1,6 +1,12 @@
+backports.ssl-match-hostname==3.5.0.1
+-e git+git@github.com:nlesc-sherlock/boatswain.git@22b8e3f125d0c7c2b0f0cad6819eba1bf0c065c5#egg=boatswain
 certifi==2017.1.23
 docker==2.0.2
 docker-pycreds==0.2.1
+ipaddress==1.0.18
+progressbar2==3.12.0
+python-utils==2.0.1
+PyYAML==3.12
 requests==2.13.0
 six==1.10.0
 websocket-client==0.40.0

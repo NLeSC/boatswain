@@ -14,8 +14,16 @@ def argparser():
     subparsers = parser.add_subparsers(help='sub-command help', dest='command')
     subparsers.required = True
 
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument(
+        '--verbose', '-v', help="Verbose output", action='store_true'
+    )
+    common.add_argument(
+        '--force', '-f', help="Force building images even if they already exists", action='store_true'
+    )
+
     buildparser = subparsers.add_parser(
-        'build', help='builds images'
+        'build', help='builds images', parents=[common]
     )
 
     buildparser.add_argument(
@@ -33,8 +41,7 @@ def main():
     with open(arguments.boatswain_file) as yamlfile:
         bsfile = yaml.load(yamlfile)
 
-    print(bsfile)
     bs = Boatswain(bsfile)
 
     if command == 'build':
-        bs.build()
+        bs.build(verbose=arguments.verbose, force=arguments.force)
