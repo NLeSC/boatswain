@@ -19,10 +19,10 @@ class Boatswain(object):
         organisation: myorg
         tag1:
             context: example/docker1
-            depends: tag3
+            from: tag3
         tag2:
             context: example/docker2
-            depends: tag3
+            from: tag3
         tag3:
             context: example/docker3
     """
@@ -45,10 +45,10 @@ class Boatswain(object):
             organisation: myorg
             tag1:
                 context: example/docker1
-                depends: tag3
+                from: tag3
             tag2:
                 context: example/docker2
-                depends: tag3
+                from: tag3
             tag3:
                 context: example/docker3
         """
@@ -98,10 +98,10 @@ class Boatswain(object):
             Example dictionary:
             tag1:
                 context: example/docker1
-                depends: tag3
+                from: tag3
             tag2:
                 context: example/docker2
-                depends: tag3
+                from: tag3
             tag3:
                 context: example/docker3
         """
@@ -115,11 +115,11 @@ class Boatswain(object):
                 definition = images[name]
 
                 # Make sure all the dependencies have been built
-                if 'depends' in definition and definition['depends'] not in self.cache:
-                    if definition['depends'] not in names:
-                        raise Exception("Could not find a recipe to build", definition['depends'], "which is needed for", name)
+                if 'from' in definition and definition['from'] not in self.cache:
+                    if definition['from'] not in names:
+                        raise Exception("Could not find a recipe to build", definition['from'], "which is needed for", name)
                     else:
-                        # Move this one to the back, because it depends on another image
+                        # Move this one to the back, because it from on another image
                         names.append(name)
                 else:
                     self.build_one(name, definition, force=force, verbose=verbose)
