@@ -1,20 +1,41 @@
+"""
+    Boatswain is a simple build system for docker images.
+
+    The build is done from a yaml file that is inspired by
+    a docker-compose file.
+
+    The Boatswain class accepts any dictionary with the
+    structure in the example below
+
+    Example boatswain file:
+        version: 1.0
+        organisation: myorg
+        tag1:
+            context: example/docker1
+            from: tag3
+        tag2:
+            context: example/docker2
+            from: tag3
+        tag3:
+            context: example/docker3
+"""
 from __future__ import absolute_import, print_function
 
-import docker
-import copy
 import logging
-import os
+import posixpath
 import json
-import progressbar
-from .bcolors import bcolors
 
-from six import iteritems
+import docker
+import progressbar
+
+from .bcolors import bcolors
+from .util import find_dependencies, extract_step, extract_id
 
 class Boatswain(object):
     """
-        Builds all images defined in the boatswain file
+        Boatswain is a simple build system for docker images.
 
-        Example boatswain file:
+        Requires a boatswain dictionary as shown below:
         version: 1.0
         organisation: myorg
         tag1:
@@ -27,70 +48,49 @@ class Boatswain(object):
             context: example/docker3
     """
 
-    def __init__(self, bsfile):
+    def __init__(self, description):
         self.client = docker.from_env()
-        self.bsfile = bsfile
+        self.description = description
         self.cache = {}
-        if 'organisation' in self.bsfile:
-            self.organisation = self.bsfile['organisation']
+        self.logger = logging.getLogger('boatswain')
+        if 'organisation' in self.description:
+            self.organisation = self.description['organisation']
         else:
             raise Exception('No organisation specified in the boatswain file!')
-    
-    def build(self, force=False, verbose=False):
-        """
-            Builds all images defined in the boatswain file
 
-            Example boatswain file:
-            version: 1.0
-            organisation: myorg
-            tag1:
-                context: example/docker1
-                from: tag3
-            tag2:
-                context: example/docker2
-                from: tag3
-            tag3:
-                context: example/docker3
+        if 'images' in self.description:
+            self.images = self.description['images']
+        else:
+            self.logger.warn("No images defined in the boatswain description")
+
+
+    def build(self, dryrun=False, force=False, verbose=False):
+        """
+            Builds all images defined in the dictionary
         """
         print(bcolors.header("Boatswain be buildin' yer dockers!"))
-        if 'images' in self.bsfile:
-            logging.debug(self.bsfile['images'])
-            return self.build_dict(self.bsfile['images'], force=force, verbose=verbose)
+        if self.images:
+            self.logger.debug(self.images)
+            return self.build_dict(self.images, dryrun=dryrun, force=force, verbose=verbose)
         else:
-            logging.warn('No images defined in boatswain file')
-
-    def remove_known_keys(self, dictionary):
-        known_keys = ['context', 'tag']
-        newdict = copy.deepcopy(dictionary)
-
-        for key in known_keys:
-            if key in newdict:
-                del newdict[key]
-        
-        return newdict
-
-    def remove_key_from_dict(self, key, dictionary):
-        newdict = copy.deepcopy(dictionary)
-        del newdict[key]
-        return newdict
+            self.logger.warn('No images defined in boatswain file')
 
 
-    def get_step(self, line):
-        stepstr = line.split(':')[0]
-        stepstr = stepstr.split(' ')[1]
-        steps = stepstr.split('/')
-        step = int(steps[0])
-        total = int(steps[1])
-
-        return (step, total)
-
-
-    def extract_id(self, line):
-        idstr = line.split(' ')[2]
-        return idstr
+    def build_up_to(self, name, dryrun=False, force=False, verbose=False):
+        """
+            Builds the image with the given name and all of
+            the images it depends on recursively
+        """
+        if self.images:
+            self.logger.debug(self.images)
+            return self.build_up_to_dict(name, self.images, dryrun=dryrun,
+                                         force=force, verbose=verbose)
+        else:
+            self.logger.warn('No images defined in boatswain file')
 
 
-    def build_dict(self, images, force=False, verbose=False):
+
+    def build_dict(self, images, dryrun=False, force=False, verbose=False):
         """
             Build all the images and their dependencies as they are defined
             in the images dictionary
@@ -105,95 +105,144 @@ class Boatswain(object):
             tag3:
                 context: example/docker3
         """
-        logging.debug(images)
+        self.logger.debug(images)
         if not images:
             return False
         else:
             names = list(images)
-            while len(names):
-                name = names.pop(0) # get the first image name
-                definition = images[name]
+            return self.build_list(names, images, dryrun=dryrun, force=force, verbose=verbose)
 
-                # Make sure all the dependencies have been built
-                if 'from' in definition and definition['from'] not in self.cache:
-                    if definition['from'] not in names:
-                        raise Exception("Could not find a recipe to build", definition['from'], "which is needed for", name)
-                    else:
-                        # Move this one to the back, because it from on another image
-                        names.append(name)
+
+    def build_up_to_dict(self, name, images, dryrun=False, force=False, verbose=False):
+        """
+           Build image name and all its dependencies from a dictionary
+        """
+        self.logger.debug("build_up_to_dict: %s", images)
+        if not images:
+            return False
+        else:
+            names = find_dependencies(name, images)
+            self.logger.debug(names)
+            return self.build_list(names, images, dryrun=dryrun, force=force, verbose=verbose)
+
+
+    def build_list(self, names, images, dryrun=False, force=False, verbose=False):
+        """
+            Builds the all images given in names and all the dependencies
+            of these images
+        """
+        built = []
+        self.logger.debug("build_list: %s", names)
+        while len(names):
+            name = names.pop(0) # get the first image name
+            definition = images[name]
+
+            # Make sure all the dependencies have been built
+            if 'from' in definition and definition['from'] not in self.cache:
+                if definition['from'] not in names:
+                    raise Exception("Could not find a recipe to build",
+                                    definition['from'], "which is needed for", name)
                 else:
-                    self.build_one(name, definition, force=force, verbose=verbose)
+                    # Move this one to the back, because it from on another image
+                    names.append(name)
+            else:
+                if self.build_one(name, definition, dryrun=dryrun, force=force, verbose=verbose):
+                    built.append(name)
+
+        return built
 
 
-    def build_one(self, name, definition, force=False, verbose=False):
+    def build_one(self, name, definition, dryrun=False, force=False, verbose=False):
         """
             Builds a single docker image.
             The image this docker image depends on should already be built!
         """
 
+        self.logger.debug("build_one: Building %s", name)
+        self.logger.debug("build_one: definition: %s", definition)
         if 'tag' in definition:
             tag = definition['tag']
         else:
             tag = name
 
-        tag = os.path.join(self.organisation, tag)
+        tag = posixpath.join(self.organisation, tag)
 
-        dobuild = False
-        if force:
-            dobuild = True
-        else:
-            try:
-                image = self.client.images.get(tag)
-                id = image.short_id
-                if id.startswith('sha256:'):
-                    id = id[7:]
-                self.cache[name] = id
-                print(bcolors.green("Found image for tag ") + bcolors.blue(name) +
-                      bcolors.green(" that is already built with id: ") + bcolors.blue(id))
-            except docker.errors.ImageNotFound as e:
-                dobuild = True
-            
+        dobuild = self.check_for_build(name, tag, force=force)
+
         if dobuild:
             if 'context' in definition:
                 directory = definition['context']
             else:
                 raise Exception("No context defined in file, aborting")
 
-            print(bcolors.green("Now building ") + bcolors.blue(name) + bcolors.green(" in directory ") +
-                bcolors.blue(directory) + bcolors.green(" and tagging as ") + bcolors.blue(tag))
+            print(bcolors.green("Now building ") + bcolors.blue(name) +
+                  bcolors.green(" in directory ") + bcolors.blue(directory) +
+                  bcolors.green(" and tagging as ") + bcolors.blue(tag))
 
-            gen = self.client.api.build(path=directory, tag=tag, rm=True, nocache=force)
-            bar = None
-            # The build function returns a generator with what would normally
-            # be the console output. Here we parse it to find which step we 
-            # are on (e.g. the layer)
-            # and whether it was successfully built, although if it does not
-            # build successfully we will get an Exception
-            if verbose:
-                print(bcolors.warning(name+": "), end="")
-            for d in gen:
-                line = json.loads(d.decode("utf-8"))['stream']
-                if verbose:
-                    if line.endswith("\n"):
-                        print(bcolors.blue(line), end="")
-                        print(bcolors.warning(name+": "), end="")
-                    else:
-                        print(bcolors.blue(line), end="")
-                if line.startswith('Step'):
-                    step, total = self.get_step(line)
-                    if bar is None:
-                        bar = progressbar.ProgressBar(max_value=total, redirect_stdout=True)
-                        bar.update(step)
-                    else:
-                        bar.update(step)
-                elif line.startswith('Successfully built'):
-                    id = self.extract_id(line)
-                    self.cache[name] = id
+            if not dryrun:
+                ident = self._build_one(name, tag, directory, force=force, verbose=verbose)
+            else:
+                ident = 'testidentifier'
+                self.cache[name] = ident
 
-            if bar is not None:
-                bar.finish()
-            
             print(bcolors.green(" Successfully built image with tag:") + bcolors.blue(tag) +
-                bcolors.green("  docker id is: ") + bcolors.blue(id))
+                  bcolors.green("  docker id is: ") + bcolors.blue(ident))
 
             return True
+
+
+    def check_for_build(self, name, tag, force=False):
+        """
+           Check whether we should build this image.
+        """
+        if force:
+            return True
+        else:
+            try:
+                image = self.client.images.get(tag)
+                ident = image.short_id
+                if ident.startswith('sha256:'):
+                    ident = ident[7:]
+                self.cache[name] = ident
+                print(bcolors.green("Found image for tag ") + bcolors.blue(name) +
+                      bcolors.green(" that is already built with id: ") + bcolors.blue(ident))
+            except docker.errors.ImageNotFound:
+                return True
+
+    def _build_one(self, name, tag, directory, force=False, verbose=False):
+        gen = self.client.api.build(path=directory, tag=tag, rm=True, nocache=force)
+        probress_bar = None
+        # The build function returns a generator with what would normally
+        # be the console output. Here we parse it to find which step we
+        # are on (e.g. the layer)
+        # and whether it was successfully built, although if it does not
+        # build successfully we will get an Exception
+        if verbose:
+            print(bcolors.warning(name+": "), end="")
+        for response in gen:
+            line = json.loads(response.decode("utf-8"))['stream']
+            if verbose:
+                if line.endswith("\n"):
+                    print(bcolors.blue(line), end="")
+                    print(bcolors.warning(name+": "), end="")
+                else:
+                    print(bcolors.blue(line), end="")
+            if line.startswith('Step'):
+                step, total = extract_step(line)
+                if probress_bar is None:
+                    probress_bar = progressbar.ProgressBar(max_value=total,
+                                                           redirect_stdout=True)
+                    probress_bar.update(step)
+                else:
+                    probress_bar.update(step)
+            elif line.startswith('Successfully built'):
+                ident = extract_id(line)
+                self.cache[name] = ident
+
+        if probress_bar is not None:
+            probress_bar.finish()
+
+        if ident:
+            return ident
+        else:
+            return False
