@@ -209,6 +209,7 @@ class Boatswain(object):
             except docker.errors.ImageNotFound:
                 return True
 
+
     def _build_one(self, name, tag, directory, force=False, verbose=False):
         gen = self.client.api.build(path=directory, tag=tag, rm=True, nocache=force)
         probress_bar = None
