@@ -266,9 +266,11 @@ class Boatswain(object):
             json_response = json.loads(response.decode("utf-8"))
             self.logger.debug(json_response)
             if 'error' in json_response:
-                raise Exception("Error while building image: ", json_response)
+                raise Exception("Error while building image: ",
+                                json_response)
             if not ('stream' in json_response or 'status' in json_response):
-                raise Exception("Unsupported response from docker: ", json_response)
+                raise Exception("Unsupported response from docker: ",
+                                json_response)
 
             if 'status' in json_response:
                 line = json_response['status']
