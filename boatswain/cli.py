@@ -1,20 +1,31 @@
+"""
+    Boatswain command line interface
+"""
 from __future__ import absolute_import
 
 import argparse
+import sys
 import yaml
-import os
-import logging
-
 from .boatswain import Boatswain
+from .bcolors import bcolors
 
 
 def argparser():
+    """
+        Define the argument parsers for Boatswain
+
+        We use subparsers, currently the implemented subparsers are:
+        - build: building docker images
+    """
     desc = 'Builds docker images based on a docker-compose style yaml file'
     parser = argparse.ArgumentParser(description=desc)
 
     subparsers = parser.add_subparsers(help='sub-command help', dest='command')
     subparsers.required = True
 
+    #
+    # Common options
+    #
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument(
         '--verbose', '-v', help="Verbose output",
@@ -29,8 +40,12 @@ def argparser():
         action='store_true'
     )
 
+
+    #
+    # Build parser
+    #
     buildparser = subparsers.add_parser(
-        'build', help='builds images', parents=[common]
+        'build', help='builds the images specified in the boatswain.yml file', parents=[common]
     )
 
     buildparser.add_argument(
@@ -46,20 +61,46 @@ def argparser():
     return parser
 
 
+def exit_with_message(message, number):
+    """
+        Exit nicely with a pretty colored message
+    """
+    if message:
+        if number < 0:
+            print (bcolors.fail(message))
+        elif number > 0:
+            print (bcolors.warning(message))
+        else:
+            print (bcolors.green(message))
+    sys.exit(number)
+
+
 def main():
-    #logging.basicConfig(level=logging.DEBUG)
-    arguments = argparser().parse_args()
+    """
+        Run the boatswain command using the given arguments
+    """
+    parser = argparser()
+    print (bcolors.header("Welcome to Boatswain"))
+
+    if len(sys.argv) < 1:
+        parser.print_help()
+        exit_with_message("", 1)
+
+    arguments = parser.parse_args()
 
     command = arguments.command
-    with open(arguments.boatswain_file) as yamlfile:
-        bsfile = yaml.load(yamlfile)
+    try:
+        with open(arguments.boatswain_file) as yamlfile:
+            bsfile = yaml.load(yamlfile)
+    except IOError as error:
+            exit_with_message(error.filename + ": " +error.strerror, -error.errno)
 
-    bs = Boatswain(bsfile)
+    bosun = Boatswain(bsfile)
 
     if command == 'build':
         if arguments.imagename:
-            bs.build_up_to(arguments.imagename, dryrun=arguments.dryrun,
-                           verbose=arguments.verbose, force=arguments.force)
+            bosun.build_up_to(arguments.imagename, dryrun=arguments.dryrun,
+                              verbose=arguments.verbose, force=arguments.force)
         else:
-            bs.build(dryrun=arguments.dryrun, verbose=arguments.verbose,
-                     force=arguments.force)
+            bosun.build(dryrun=arguments.dryrun, verbose=arguments.verbose,
+                        force=arguments.force)
