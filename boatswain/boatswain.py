@@ -265,6 +265,10 @@ class Boatswain(object):
         for response in gen:
             json_response = json.loads(response.decode("utf-8"))
             self.logger.debug(json_response)
+            if 'error' in json_response:
+                raise Exception("Error while building image: ", json_response)
+            if 'stream' not in json_response:
+                raise Exception("Unsupported response from docker: ", json_response)
             line = json_response['stream']
             if verbose:
                 if line.endswith("\n"):
