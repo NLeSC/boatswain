@@ -5,7 +5,6 @@
 import logging
 
 
-
 def extract_step(line):
     """
         Extracts the step from a docker-py result line
@@ -14,7 +13,8 @@ def extract_step(line):
         Step 3/9: Sometext
     """
     logger = logging.getLogger("boatswain")
-    logger.debug("Extracting from line: "+line)
+    logger.debug("Extracting from line: " + line)
+
     # Get the first part: Step 3/9
     stepstr = line.split(':')[0]
     # Get the step numbers: 3/9

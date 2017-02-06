@@ -31,6 +31,7 @@ import progressbar
 from .bcolors import bcolors
 from .util import find_dependencies, extract_step, extract_id
 
+
 class Boatswain(object):
     """
         Boatswain is a simple build system for docker images.
@@ -63,17 +64,16 @@ class Boatswain(object):
         else:
             self.logger.warn("No images defined in the boatswain description")
 
-
     def build(self, dryrun=False, force=False, verbose=False):
         """
             Builds all images defined in the dictionary
         """
         if self.images:
             self.logger.debug(self.images)
-            return self.build_dict(self.images, dryrun=dryrun, force=force, verbose=verbose)
+            return self.build_dict(self.images, dryrun=dryrun, force=force,
+                                   verbose=verbose)
         else:
             self.logger.warn('No images defined in boatswain file')
-
 
     def build_up_to(self, name, dryrun=False, force=False, verbose=False):
         """
@@ -86,8 +86,6 @@ class Boatswain(object):
                                          force=force, verbose=verbose)
         else:
             self.logger.warn('No images defined in boatswain file')
-
-
 
     def build_dict(self, images, dryrun=False, force=False, verbose=False):
         """
@@ -109,10 +107,11 @@ class Boatswain(object):
             return False
         else:
             names = list(images)
-            return self.build_list(names, images, dryrun=dryrun, force=force, verbose=verbose)
+            return self.build_list(names, images, dryrun=dryrun, force=force,
+                                   verbose=verbose)
 
-
-    def build_up_to_dict(self, name, images, dryrun=False, force=False, verbose=False):
+    def build_up_to_dict(self, name, images, dryrun=False, force=False,
+                         verbose=False):
         """
            Build image name and all its dependencies from a dictionary
         """
@@ -122,10 +121,11 @@ class Boatswain(object):
         else:
             names = find_dependencies(name, images)
             self.logger.debug(names)
-            return self.build_list(names, images, dryrun=dryrun, force=force, verbose=verbose)
+            return self.build_list(names, images, dryrun=dryrun, force=force,
+                                   verbose=verbose)
 
-
-    def build_list(self, names, images, dryrun=False, force=False, verbose=False):
+    def build_list(self, names, images, dryrun=False, force=False,
+                   verbose=False):
         """
             Builds the all images given in names and all the dependencies
             of these images
@@ -133,25 +133,28 @@ class Boatswain(object):
         built = []
         self.logger.debug("build_list: %s", names)
         while len(names):
-            name = names.pop(0) # get the first image name
+            name = names.pop(0)  # get the first image name
             definition = images[name]
 
             # Make sure all the dependencies have been built
             if 'from' in definition and definition['from'] not in self.cache:
                 if definition['from'] not in names:
                     raise Exception("Could not find a recipe to build",
-                                    definition['from'], "which is needed for", name)
+                                    definition['from'], "which is needed for",
+                                    name)
                 else:
-                    # Move this one to the back, because it from on another image
+                    # Move this one to the back, because it from on another
+                    # image
                     names.append(name)
             else:
-                if self.build_one(name, definition, dryrun=dryrun, force=force, verbose=verbose):
+                if self.build_one(name, definition, dryrun=dryrun, force=force,
+                                  verbose=verbose):
                     built.append(name)
 
         return built
 
-
-    def build_one(self, name, definition, dryrun=False, force=False, verbose=False):
+    def build_one(self, name, definition, dryrun=False, force=False,
+                  verbose=False):
         """
             Builds a single docker image.
             The image this docker image depends on should already be built!
@@ -172,7 +175,8 @@ class Boatswain(object):
               " and tagging as " + bcolors.blue(tag))
 
         if not dryrun:
-            ident = self._build_one(name, tag, directory, force=force, verbose=verbose)
+            ident = self._build_one(
+                name, tag, directory, force=force, verbose=verbose)
         else:
             ident = 'testidentifier'
             self.cache[name] = ident
@@ -182,17 +186,15 @@ class Boatswain(object):
 
         return True
 
-
     def check_if_exists(self, tag):
         """
            Check whether this image exists.
         """
         try:
-            image = self.client.images.get(tag)
+            self.client.images.get(tag)
             return True
         except docker.errors.ImageNotFound:
             return False
-
 
     def clean(self, dryrun=False, force=False, verbose=False):
         """
@@ -200,22 +202,23 @@ class Boatswain(object):
         """
         if self.images:
             self.logger.debug(self.images)
-            return self.clean_dict(self.images, dryrun=dryrun, force=force, verbose=verbose)
+            return self.clean_dict(self.images, dryrun=dryrun, force=force,
+                                   verbose=verbose)
         else:
             self.logger.warn('No images defined in boatswain file')
-
 
     def clean_dict(self, images, dryrun=False, force=False, verbose=False):
         if not images:
             return False
         else:
             names = list(images)
-            return self.clean_list(names, images, dryrun=dryrun, force=force, verbose=verbose)
+            return self.clean_list(names, images, dryrun=dryrun, force=force,
+                                   verbose=verbose)
 
-
-    def clean_list(self, names, images, dryrun=False, force=False, verbose=False):
+    def clean_list(self, names, images, dryrun=False, force=False,
+                   verbose=False):
         while len(names):
-            name = names.pop(0) # get the first image name
+            name = names.pop(0)  # get the first image name
             definition = images[name]
 
             # Make sure all the dependencies have been built
@@ -224,16 +227,16 @@ class Boatswain(object):
                 # remove another image that this one depends on
                 names.append(name)
             else:
-                self.clean_one(name, definition, dryrun=dryrun, force=force, verbose=verbose)
+                self.clean_one(name, definition, dryrun=dryrun,
+                               force=force, verbose=verbose)
 
-
-    def clean_one(self, name, definition, dryrun=False, force=False, verbose=False):
+    def clean_one(self, name, definition, dryrun=False, force=False,
+                  verbose=False):
         tag = self.get_full_tag(name, definition)
         exists = self.check_if_exists(tag)
         if exists:
-            print("removing image with tag: "+bcolors.blue(tag))
+            print("removing image with tag: " + bcolors.blue(tag))
             self.client.images.remove(tag)
-
 
     def get_full_tag(self, name, definition):
         """
@@ -248,9 +251,9 @@ class Boatswain(object):
 
         return tag
 
-
     def _build_one(self, name, tag, directory, force=False, verbose=False):
-        gen = self.client.api.build(path=directory, tag=tag, rm=True, nocache=force)
+        gen = self.client.api.build(path=directory, tag=tag, rm=True,
+                                    nocache=force)
         progress_bar = None
         # The build function returns a generator with what would normally
         # be the console output. Here we parse it to find which step we
@@ -258,13 +261,13 @@ class Boatswain(object):
         # and whether it was successfully built, although if it does not
         # build successfully we will get an Exception
         if verbose:
-            print(bcolors.warning(name+": "), end="")
+            print(bcolors.warning(name + ": "), end="")
         for response in gen:
             line = json.loads(response.decode("utf-8"))['stream']
             if verbose:
                 if line.endswith("\n"):
                     print(bcolors.blue(line), end="")
-                    print(bcolors.warning(name+": "), end="")
+                    print(bcolors.warning(name + ": "), end="")
                 else:
                     print(bcolors.blue(line), end="")
             if line.startswith('Step'):
@@ -275,7 +278,7 @@ class Boatswain(object):
                     progress_bar = \
                         progressbar.ProgressBar(max_value=total,
                                                 redirect_stdout=True)
-                      
+
                     progress_bar.update(step)
                 else:
                     progress_bar.update(step)
