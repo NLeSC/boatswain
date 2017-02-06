@@ -31,6 +31,7 @@ setup(
     ],
     extras_require={
         'registry': ['docker-registry-client>=0.5.1'],
+        'test': ['pytest', 'pytest-flake8', 'pytest-cov'],
     },
     author_email='b.weel@esiencecenter.nl',
     description=(

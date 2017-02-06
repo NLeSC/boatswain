@@ -68,7 +68,6 @@ class Boatswain(object):
         """
             Builds all images defined in the dictionary
         """
-        print(bcolors.header("Boatswain be buildin' yer dockers!"))
         if self.images:
             self.logger.debug(self.images)
             return self.build_dict(self.images, dryrun=dryrun, force=force, verbose=verbose)
@@ -160,14 +159,9 @@ class Boatswain(object):
 
         self.logger.debug("build_one: Building %s", name)
         self.logger.debug("build_one: definition: %s", definition)
-        if 'tag' in definition:
-            tag = definition['tag']
-        else:
-            tag = name
 
-        tag = posixpath.join(self.organisation, tag)
-
-        dobuild = self.check_for_build(name, tag, force=force)
+        tag = self.get_full_tag(name, definition)
+        dobuild = self.check_for_build(name, tag, verbose=verbose, force=force)
 
         if dobuild:
             if 'context' in definition:
@@ -175,9 +169,9 @@ class Boatswain(object):
             else:
                 raise Exception("No context defined in file, aborting")
 
-            print(bcolors.green("Now building ") + bcolors.blue(name) +
-                  bcolors.green(" in directory ") + bcolors.blue(directory) +
-                  bcolors.green(" and tagging as ") + bcolors.blue(tag))
+            print("Now building " + bcolors.blue(name) +
+                  " in directory " + bcolors.blue(directory) +
+                  " and tagging as " + bcolors.blue(tag))
 
             if not dryrun:
                 ident = self._build_one(name, tag, directory, force=force, verbose=verbose)
@@ -185,13 +179,13 @@ class Boatswain(object):
                 ident = 'testidentifier'
                 self.cache[name] = ident
 
-            print(bcolors.green(" Successfully built image with tag:") + bcolors.blue(tag) +
-                  bcolors.green("  docker id is: ") + bcolors.blue(ident))
+            print("Successfully built image with tag:" + bcolors.blue(tag) +
+                  " docker id is: " + bcolors.blue(ident))
 
             return True
 
 
-    def check_for_build(self, name, tag, force=False):
+    def check_for_build(self, name, tag, verbose=False, force=False):
         """
            Check whether we should build this image.
         """
@@ -204,11 +198,77 @@ class Boatswain(object):
                 if ident.startswith('sha256:'):
                     ident = ident[7:]
                 self.cache[name] = ident
-                print(bcolors.green("Found image for tag ") + bcolors.blue(name) +
-                      bcolors.green(" that is already built with id: ") + bcolors.blue(ident))
+                if verbose:
+                    print("Found image for tag " + bcolors.blue(name) +
+                          " that is already built with id: " + bcolors.blue(ident))
+                return False
             except docker.errors.ImageNotFound:
                 return True
 
+
+    def check_if_exists(self, tag, verbose=False):
+        """
+           Check whether this image exists.
+        """
+        try:
+            image = self.client.images.get(tag)
+            return True
+        except docker.errors.ImageNotFound:
+            return False
+
+
+    def clean(self, dryrun=False, force=False, verbose=False):
+        """
+            Builds all images defined in the dictionary
+        """
+        if self.images:
+            self.logger.debug(self.images)
+            return self.clean_dict(self.images, dryrun=dryrun, force=force, verbose=verbose)
+        else:
+            self.logger.warn('No images defined in boatswain file')
+
+
+    def clean_dict(self, images, dryrun=False, force=False, verbose=False):
+        if not images:
+            return False
+        else:
+            names = list(images)
+            return self.clean_list(names, images, dryrun=dryrun, force=force, verbose=verbose)
+
+
+    def clean_list(self, names, images, dryrun=False, force=False, verbose=False):
+        while len(names):
+            name = names.pop(0) # get the first image name
+            definition = images[name]
+
+            # Make sure all the dependencies have been built
+            if 'from' in definition and definition['from'] in names:
+                # Move this one to the back, because we first need to
+                # remove another image that this one depends on
+                names.append(name)
+            else:
+                self.clean_one(name, definition, dryrun=dryrun, force=force, verbose=verbose)
+
+
+    def clean_one(self, name, definition, dryrun=False, force=False, verbose=False):
+        tag = self.get_full_tag(name, definition)
+        exists = self.check_if_exists(tag)
+        if exists:
+            print("removing image with tag: "+bcolors.blue(tag))
+            self.client.images.remove(tag)
+
+    def get_full_tag(self, name, definition):
+        """
+            Get the full tag for image
+        """
+        if 'tag' in definition:
+            tag = definition['tag']
+        else:
+            tag = name
+
+        tag = posixpath.join(self.organisation, tag)
+
+        return tag
 
     def _build_one(self, name, tag, directory, force=False, verbose=False):
         gen = self.client.api.build(path=directory, tag=tag, rm=True, nocache=force)

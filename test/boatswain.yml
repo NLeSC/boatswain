@@ -1,0 +1,14 @@
+version: 1.0
+organisation: boatswain
+images:
+    image1:
+        context: docker/image1
+    image2:
+        context: docker/image2
+        from: image1
+    image3:
+        context: docker/image3
+        from: image2
+    image4:
+        context: docker/image4
+        tag: image12
