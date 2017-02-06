@@ -3,43 +3,20 @@
 
     Currently tests only very basic things
 """
-import StringIO
-import logging
-
 import pytest
-import yaml
-
 from boatswain import Boatswain
 
-def boatswain_file():
-    """
-        The shared boatswain file
-    """
-    return """
-        version: 1.0
-        organisation: test1
-        images:
-            image1:
-                context: image1
-            image2:
-                context: image2
-                from: image1
-            image3:
-                context: image3
-                from: image2
-            image4:
-                context: image4
-                tag: image12
-    """
 
-
-@pytest.fixture
-def bsfile():
+@pytest.mark.usefixtures("ensure_not_built")
+def test_build_dict(bsfile):
     """
-        Shared boatswain file loaded using yaml
+        Build only one image with its dependencies
     """
-    boatswainfile = StringIO.StringIO(boatswain_file())
-    return yaml.load(boatswainfile)
+    bosun = Boatswain(bsfile)
+    built = bosun.build_dict(bsfile['images'])
+    assert sorted(built, key=str.lower) \
+        == sorted(["image4", "image3", "image2", "image1"],
+                  key=str.lower)
 
 
 def test_file(bsfile):
@@ -50,15 +27,12 @@ def test_file(bsfile):
     Boatswain(bsfile)
 
 
-def test_up_to(bsfile):
+@pytest.mark.usefixtures("ensure_not_built")
+def test_build_up_to(bsfile):
     """
         Build only one image with its dependencies
     """
-    logging.basicConfig(level=logging.DEBUG)
     bosun = Boatswain(bsfile)
     built = bosun.build_up_to("image3", dryrun=True)
-    assert sorted(built, key=str.lower) == sorted(["image3", "image2", "image1"], key=str.lower)
-
-#if __name__ == "__main__":
-#    f = bsfile()
-#    test_up_to(f)
+    assert sorted(built, key=str.lower) \
+        == sorted(["image3", "image2", "image1"], key=str.lower)

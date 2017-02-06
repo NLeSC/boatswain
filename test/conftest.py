@@ -1,7 +1,7 @@
 """
     Shared fixtures for testing
 """
-import StringIO
+from io import StringIO
 import pytest
 import yaml
 
@@ -35,7 +35,7 @@ def bsfile():
     """
         Shared boatswain file loaded using yaml
     """
-    boatswainfile = StringIO.StringIO(boatswain_file())
+    boatswainfile = StringIO(boatswain_file())
     return yaml.load(boatswainfile)
 
 
