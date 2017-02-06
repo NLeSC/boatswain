@@ -263,7 +263,9 @@ class Boatswain(object):
         if verbose:
             print(bcolors.warning(name + ": "), end="")
         for response in gen:
-            line = json.loads(response.decode("utf-8"))['stream']
+            json_response = json.loads(response.decode("utf-8"))
+            self.logger.debug(json_response)
+            line = json_response['stream']
             if verbose:
                 if line.endswith("\n"):
                     print(bcolors.blue(line), end="")
