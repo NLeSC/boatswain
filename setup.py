@@ -25,7 +25,7 @@ setup(
     author='Berend Weel',
     tests_require=['pytest'],
     install_requires=[
-        'docker>=2.0.2, <3.0.0',
+        'docker>=2.0.0, <3.0.0',
         'PyYAML>=3.12, <4.0',
         'progressbar2>=3.12.0, <4.0.0'
     ],

@@ -49,7 +49,7 @@ class Boatswain(object):
     """
 
     def __init__(self, description):
-        self.client = docker.from_env()
+        self.client = docker.from_env(version="auto")
         self.description = description
         self.cache = {}
         self.logger = logging.getLogger('boatswain')
@@ -272,7 +272,7 @@ class Boatswain(object):
 
     def _build_one(self, name, tag, directory, force=False, verbose=False):
         gen = self.client.api.build(path=directory, tag=tag, rm=True, nocache=force)
-        probress_bar = None
+        progress_bar = None
         # The build function returns a generator with what would normally
         # be the console output. Here we parse it to find which step we
         # are on (e.g. the layer)
@@ -290,18 +290,22 @@ class Boatswain(object):
                     print(bcolors.blue(line), end="")
             if line.startswith('Step'):
                 step, total = extract_step(line)
-                if probress_bar is None:
-                    probress_bar = progressbar.ProgressBar(max_value=total,
-                                                           redirect_stdout=True)
-                    probress_bar.update(step)
+                if progress_bar is None:
+                    if total is None:
+                        total = progressbar.UnknownLength
+                    progress_bar = \
+                        progressbar.ProgressBar(max_value=total,
+                                                redirect_stdout=True)
+                      
+                    progress_bar.update(step)
                 else:
-                    probress_bar.update(step)
+                    progress_bar.update(step)
             elif line.startswith('Successfully built'):
                 ident = extract_id(line)
                 self.cache[name] = ident
 
-        if probress_bar is not None:
-            probress_bar.finish()
+        if progress_bar is not None:
+            progress_bar.finish()
 
         if ident:
             return ident

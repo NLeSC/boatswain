@@ -2,6 +2,8 @@
     Utility functions for working with docker-py
     and dictionaries
 """
+import logging
+
 
 def extract_step(line):
     """
@@ -10,6 +12,8 @@ def extract_step(line):
         These lines look like:
         Step 3/9: Sometext
     """
+    logger = logging.getLogger("boatswain")
+    logger.debug("Extracting from line: "+line)
     # Get the first part: Step 3/9
     stepstr = line.split(':')[0]
     # Get the step numbers: 3/9
@@ -17,9 +21,14 @@ def extract_step(line):
     # Split them
     steps = stepstr.split('/')
     # Convert them to numbers
-    step = int(steps[0])
-    total = int(steps[1])
-
+    if len(steps) == 2:
+        step = int(steps[0])
+        total = int(steps[1])
+    elif len(steps) == 1:
+        step = int(steps[0])
+        total = None
+    else:
+        raise Exception("Unrecognized docker step response: " + line)
     return (step, total)
 
 

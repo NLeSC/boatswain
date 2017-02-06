@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 import argparse
 import sys
+import logging
 import yaml
 from .boatswain import Boatswain
 from .bcolors import bcolors
@@ -37,6 +38,10 @@ def argparser():
     )
     common.add_argument(
         '--dryrun', help="Do a dry run don't actually build",
+        action='store_true'
+    )
+    common.add_argument(
+        '--debug', help="Debug boatswain itself",
         action='store_true'
     )
 
@@ -87,6 +92,9 @@ def main():
         exit_with_message("", 1)
 
     arguments = parser.parse_args()
+
+    if arguments.debug:
+        logging.basicConfig(level=logging.DEBUG)
 
     command = arguments.command
     try:
