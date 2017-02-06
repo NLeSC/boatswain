@@ -73,11 +73,11 @@ def exit_with_message(message, number):
     """
     if message:
         if number < 0:
-            print (bcolors.fail(message))
+            print(bcolors.fail(message))
         elif number > 0:
-            print (bcolors.warning(message))
+            print(bcolors.warning(message))
         else:
-            print (bcolors.green(message))
+            print(bcolors.green(message))
     sys.exit(number)
 
 
@@ -86,7 +86,7 @@ def main():
         Run the boatswain command using the given arguments
     """
     parser = argparser()
-    print (bcolors.header("Welcome to Boatswain"))
+    print(bcolors.header("Welcome to Boatswain"))
 
     if len(sys.argv) < 1:
         parser.print_help()
