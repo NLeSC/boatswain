@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/nlesc-sherlock/boatswain.svg?branch=master
+    :target: https://travis-ci.org/nlesc-sherlock/boatswain
+
 Installation
 ============
 
