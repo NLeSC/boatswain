@@ -5,5 +5,8 @@ from .cli import argparser
 
 __all__ = [
     "Boatswain",
-    argparser
+    "argparser",
+    "find_dependencies",
+    "extract_id",
+    "extract_step"
 ]

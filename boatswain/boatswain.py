@@ -161,52 +161,29 @@ class Boatswain(object):
         self.logger.debug("build_one: definition: %s", definition)
 
         tag = self.get_full_tag(name, definition)
-        dobuild = self.check_for_build(name, tag, verbose=verbose, force=force)
 
-        if dobuild:
-            if 'context' in definition:
-                directory = definition['context']
-            else:
-                raise Exception("No context defined in file, aborting")
-
-            print("Now building " + bcolors.blue(name) +
-                  " in directory " + bcolors.blue(directory) +
-                  " and tagging as " + bcolors.blue(tag))
-
-            if not dryrun:
-                ident = self._build_one(name, tag, directory, force=force, verbose=verbose)
-            else:
-                ident = 'testidentifier'
-                self.cache[name] = ident
-
-            print("Successfully built image with tag:" + bcolors.blue(tag) +
-                  " docker id is: " + bcolors.blue(ident))
-
-            return True
-
-
-    def check_for_build(self, name, tag, verbose=False, force=False):
-        """
-           Check whether we should build this image.
-        """
-        if force:
-            return True
+        if 'context' in definition:
+            directory = definition['context']
         else:
-            try:
-                image = self.client.images.get(tag)
-                ident = image.short_id
-                if ident.startswith('sha256:'):
-                    ident = ident[7:]
-                self.cache[name] = ident
-                if verbose:
-                    print("Found image for tag " + bcolors.blue(name) +
-                          " that is already built with id: " + bcolors.blue(ident))
-                return False
-            except docker.errors.ImageNotFound:
-                return True
+            raise Exception("No context defined in file, aborting")
+
+        print("Now building " + bcolors.blue(name) +
+              " in directory " + bcolors.blue(directory) +
+              " and tagging as " + bcolors.blue(tag))
+
+        if not dryrun:
+            ident = self._build_one(name, tag, directory, force=force, verbose=verbose)
+        else:
+            ident = 'testidentifier'
+            self.cache[name] = ident
+
+        print("Successfully built image with tag:" + bcolors.blue(tag) +
+              " docker id is: " + bcolors.blue(ident))
+
+        return True
 
 
-    def check_if_exists(self, tag, verbose=False):
+    def check_if_exists(self, tag):
         """
            Check whether this image exists.
         """
@@ -257,6 +234,7 @@ class Boatswain(object):
             print("removing image with tag: "+bcolors.blue(tag))
             self.client.images.remove(tag)
 
+
     def get_full_tag(self, name, definition):
         """
             Get the full tag for image
@@ -269,6 +247,7 @@ class Boatswain(object):
         tag = posixpath.join(self.organisation, tag)
 
         return tag
+
 
     def _build_one(self, name, tag, directory, force=False, verbose=False):
         gen = self.client.api.build(path=directory, tag=tag, rm=True, nocache=force)

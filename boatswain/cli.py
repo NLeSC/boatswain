@@ -32,7 +32,8 @@ def argparser():
         action='store_true'
     )
     common.add_argument(
-        '--force', '-f', help="Force building images even if they already exists",
+        '--force', '-f',
+        help="Force building images even if they already exists",
         action='store_true'
     )
     common.add_argument(
@@ -40,12 +41,12 @@ def argparser():
         action='store_true'
     )
 
-
     #
     # Build parser
     #
     buildparser = subparsers.add_parser(
-        'build', help='builds the images specified in the boatswain.yml file', parents=[common]
+        'build', help='builds the images specified in the boatswain.yml file',
+        parents=[common]
     )
 
     buildparser.add_argument(
@@ -93,7 +94,7 @@ def main():
         with open(arguments.boatswain_file) as yamlfile:
             bsfile = yaml.load(yamlfile)
     except IOError as error:
-            exit_with_message(error.filename + ": " +error.strerror, -error.errno)
+        exit_with_message(error.filename + ": " + error.strerror, -error.errno)
 
     bosun = Boatswain(bsfile)
 

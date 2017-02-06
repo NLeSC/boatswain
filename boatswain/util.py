@@ -3,6 +3,7 @@
     and dictionaries
 """
 
+
 def extract_step(line):
     """
         Extracts the step from a docker-py result line

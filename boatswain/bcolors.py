@@ -11,7 +11,7 @@ class bcolors:
     @staticmethod
     def blue(string):
         return bcolors._wrap(bcolors.OKBLUE, string)
-    
+
     @staticmethod
     def green(string):
         return bcolors._wrap(bcolors.OKGREEN, string)
@@ -27,7 +27,7 @@ class bcolors:
     @staticmethod
     def header(string):
         return bcolors._wrap(bcolors.HEADER, string)
-    
+
     @staticmethod
     def bold(string):
         return bcolors._wrap(bcolors.BOLD, string)

@@ -12,7 +12,7 @@ def boatswain_file():
     """
         The shared boatswain file
     """
-    return """
+    return u"""
         version: 1.0
         organisation: boatswain
         images:
