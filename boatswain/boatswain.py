@@ -29,7 +29,8 @@ import docker
 import progressbar
 
 from .bcolors import bcolors
-from .util import find_dependencies, extract_step, extract_id
+from .util import find_dependencies, extract_step, extract_id, \
+    extract_container_id_removal, extract_container_id
 
 
 class Boatswain(object):
@@ -62,30 +63,34 @@ class Boatswain(object):
         if 'images' in self.description:
             self.images = self.description['images']
         else:
+            # Should not having images be an exception?
+            self.images = {}
             self.logger.warn("No images defined in the boatswain description")
 
     def build(self, dryrun=False, force=False, verbose=False):
         """
             Builds all images defined in the dictionary
         """
-        if self.images:
+        if not self.images:
+            self.logger.warn('No images defined in boatswain file')
+            return []
+        else:
             self.logger.debug(self.images)
             return self.build_dict(self.images, dryrun=dryrun, force=force,
                                    verbose=verbose)
-        else:
-            self.logger.warn('No images defined in boatswain file')
 
     def build_up_to(self, name, dryrun=False, force=False, verbose=False):
         """
             Builds the image with the given name and all of
             the images it depends on recursively
         """
-        if self.images:
+        if not self.images:
+            self.logger.warn('No images defined in boatswain file')
+            return []
+        else:
             self.logger.debug(self.images)
             return self.build_up_to_dict(name, self.images, dryrun=dryrun,
                                          force=force, verbose=verbose)
-        else:
-            self.logger.warn('No images defined in boatswain file')
 
     def build_dict(self, images, dryrun=False, force=False, verbose=False):
         """
@@ -104,7 +109,8 @@ class Boatswain(object):
         """
         self.logger.debug(images)
         if not images:
-            return False
+            self.logger.warn('No images defined')
+            return []
         else:
             names = list(images)
             return self.build_list(names, images, dryrun=dryrun, force=force,
@@ -117,7 +123,8 @@ class Boatswain(object):
         """
         self.logger.debug("build_up_to_dict: %s", images)
         if not images:
-            return False
+            self.logger.warn('No images defined')
+            return []
         else:
             names = find_dependencies(name, images)
             self.logger.debug(names)
@@ -196,27 +203,58 @@ class Boatswain(object):
         except docker.errors.ImageNotFound:
             return False
 
-    def clean(self, dryrun=False, force=False, verbose=False):
+    def clean(self, dryrun=False):
         """
-            Builds all images defined in the dictionary
+            Removes all images defined in the dictionary
         """
         if self.images:
             self.logger.debug(self.images)
-            return self.clean_dict(self.images, dryrun=dryrun, force=force,
-                                   verbose=verbose)
+            return self.clean_dict(self.images, dryrun=dryrun)
         else:
             self.logger.warn('No images defined in boatswain file')
+            return False
 
-    def clean_dict(self, images, dryrun=False, force=False, verbose=False):
+    def clean_up_to(self, name, dryrun=False):
+        """
+            Cleans the image with the given name and all of
+            the images it depends on recursively
+        """
+        if not self.images:
+            self.logger.warn('No images defined in boatswain file')
+            return []
+        else:
+            self.logger.debug(self.images)
+            return self.clean_up_to_dict(name, self.images, dryrun=dryrun)
+
+    def clean_up_to_dict(self, name, images, dryrun=False):
+        """
+            Cleans the image with the given name and all of
+            the images it depends on recursively
+        """
+        self.logger.debug("build_up_to_dict: %s", images)
+        if not images:
+            self.logger.warn('No images defined')
+            return []
+        else:
+            names = find_dependencies(name, images)
+            self.logger.debug(names)
+            return self.clean_list(names, images, dryrun=dryrun)
+
+    def clean_dict(self, images, dryrun=False):
+        """
+            Removes all images defined in the dictionary
+        """
         if not images:
             return False
         else:
             names = list(images)
-            return self.clean_list(names, images, dryrun=dryrun, force=force,
-                                   verbose=verbose)
+            return self.clean_list(names, images, dryrun=dryrun)
 
-    def clean_list(self, names, images, dryrun=False, force=False,
-                   verbose=False):
+    def clean_list(self, names, images, dryrun=False):
+        """
+            Removes all images defined in the list
+        """
+        cleaned = []
         while len(names):
             name = names.pop(0)  # get the first image name
             definition = images[name]
@@ -227,16 +265,22 @@ class Boatswain(object):
                 # remove another image that this one depends on
                 names.append(name)
             else:
-                self.clean_one(name, definition, dryrun=dryrun,
-                               force=force, verbose=verbose)
+                if self.clean_one(name, definition, dryrun=dryrun):
+                    cleaned.append(name)
+        return cleaned
 
-    def clean_one(self, name, definition, dryrun=False, force=False,
-                  verbose=False):
+    def clean_one(self, name, definition, dryrun=False):
+        """
+            Removes the specified image if it exists
+        """
         tag = self.get_full_tag(name, definition)
         exists = self.check_if_exists(tag)
         if exists:
             print("removing image with tag: " + bcolors.blue(tag))
-            self.client.images.remove(tag)
+            if not dryrun:
+                self.client.images.remove(tag)
+            return True
+        return False
 
     def get_full_tag(self, name, definition):
         """
@@ -252,6 +296,9 @@ class Boatswain(object):
         return tag
 
     def _build_one(self, name, tag, directory, force=False, verbose=False):
+        """
+            Build one image using the low level docker-py api
+        """
         gen = self.client.api.build(path=directory, tag=tag, rm=True,
                                     nocache=force)
         progress_bar = None
@@ -299,6 +346,17 @@ class Boatswain(object):
             elif line.startswith('Successfully built'):
                 ident = extract_id(line)
                 self.cache[name] = ident
+            elif line.startswith(' ---> Running in '):
+                running_container = extract_container_id(line)
+            elif line.startswith('Removing intermediate container'):
+                container_id = extract_container_id_removal(line)
+                if container_id == running_container:
+                    running_container = False
+                else:
+                    raise Exception("Docker is removing container with id: " +
+                                    bcolors.blue(container_id) +
+                                    " while we expected id: " +
+                                    bcolors.blue(running_container))
 
         if progress_bar is not None:
             progress_bar.finish()

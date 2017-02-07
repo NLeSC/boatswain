@@ -33,17 +33,16 @@ def argparser():
         action='store_true'
     )
     common.add_argument(
-        '--force', '-f',
-        help="Force building images even if they already exists",
-        action='store_true'
-    )
-    common.add_argument(
         '--dryrun', help="Do a dry run don't actually build",
         action='store_true'
     )
     common.add_argument(
         '--debug', help="Debug boatswain itself",
         action='store_true'
+    )
+    common.add_argument(
+        '--boatswain_file', '-b', help='Override the default boatswain file',
+        default='boatswain.yml'
     )
 
     #
@@ -53,15 +52,26 @@ def argparser():
         'build', help='builds the images specified in the boatswain.yml file',
         parents=[common]
     )
-
+    buildparser.add_argument(
+        '--force', '-f',
+        help="Force building images even if they already exists",
+        action='store_true'
+    )
     buildparser.add_argument(
         'imagename', help="Name of the image to build",
         nargs='?'
     )
 
-    buildparser.add_argument(
-        '--boatswain_file', '-b', help='Override the default boatswain file',
-        default='boatswain.yml'
+    #
+    # Clean parser
+    #
+    cleanparser = subparsers.add_parser(
+        'clean', help='Clean the images specified in the boatswain.yml file',
+        parents=[common]
+    )
+    cleanparser.add_argument(
+        'imagename', help="Name of the image to clean",
+        nargs='?'
     )
 
     return parser
@@ -113,3 +123,8 @@ def main():
         else:
             bosun.build(dryrun=arguments.dryrun, verbose=arguments.verbose,
                         force=arguments.force)
+    elif command == 'clean':
+        if arguments.imagename:
+            bosun.clean_up_to(arguments.imagename, dryrun=arguments.dryrun)
+        else:
+            bosun.clean(dryrun=arguments.dryrun)

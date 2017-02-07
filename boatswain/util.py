@@ -35,13 +35,39 @@ def extract_step(line):
 
 def extract_id(line):
     """
-        Extract the docker id from a success line
+        Extract the image id from a success line
 
         These lines look like:
         'Successfully built ad8402983js938'
     """
     idstr = line.split(' ')[2]
     return idstr
+
+
+def extract_container_id(line):
+    """
+        Extract container id from a Running in line
+
+         ---> Running in 816abeca3961
+    """
+    parts = line.strip().split(' ')
+    if len(parts) == 4:
+        return parts[3]
+    else:
+        raise Exception("Unrecognized docker running in line: " + line)
+
+
+def extract_container_id_removal(line):
+    """
+        Extract container id from a Removing line
+
+         Removing intermediate container 816abeca3961
+    """
+    parts = line.strip().split(' ')
+    if len(parts) == 4:
+        return parts[3]
+    else:
+        raise Exception("Unrecognized docker removing line: " + line)
 
 
 def find_dependencies(name, images):
