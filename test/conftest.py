@@ -116,6 +116,7 @@ def check_if_exists(client, tag):
     except docker.errors.ImageNotFound:
         return False
 
+
 @pytest.fixture
 def ensure_clean(bsfile, bsfile_fail):
     """
