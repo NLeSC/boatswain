@@ -34,7 +34,7 @@ syntax, which is heavily based on docker-compose.
             context: docker/image1  # The path of the dockerfile
         image2:pytest:
             context: docker/image2
-            from: image1:pytest
+            from: image1:pytest     # This image depends on the other image
         image3:pytest:
             context: docker/image3
             from: image2:pytest
