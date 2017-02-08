@@ -16,32 +16,6 @@ def test_file(bsfile):
     Boatswain(bsfile)
 
 
-def test_clean(bsfile):
-    """
-        Test the clean function
-
-        test it first, because we need it later
-    """
-    # Build an image by hand to remove
-    client = docker.from_env()
-    client.images.build(path="test/docker/image1")
-    bosun = Boatswain(bsfile)
-    cleaned = bosun.clean()
-    assert cleaned
-
-
-def test_clean_no_images(bsfile):
-    """
-        Test the clean function
-
-        test it first, because we need it later
-    """
-    del bsfile['images']
-    bosun = Boatswain(bsfile)
-    cleaned = bosun.clean()
-    assert not cleaned
-
-
 @pytest.mark.usefixtures("ensure_clean")
 def test_build(bsfile):
     """
@@ -173,6 +147,33 @@ def test_build_no_organisation(bsfile):
 # Continue testing cleaning
 # Building should succeed by now
 #
+@pytest.mark.usefixtures("ensure_built")
+def test_clean(bsfile):
+    """
+        Test the clean function
+
+        test it first, because we need it later
+    """
+    # Build an image by hand to remove
+    client = docker.from_env()
+    client.images.build(path="test/docker/image1")
+    bosun = Boatswain(bsfile)
+    cleaned = bosun.clean()
+    assert cleaned
+
+
+def test_clean_no_images(bsfile):
+    """
+        Test the clean function
+
+        test it first, because we need it later
+    """
+    del bsfile['images']
+    bosun = Boatswain(bsfile)
+    cleaned = bosun.clean()
+    assert not cleaned
+
+
 @pytest.mark.usefixtures("ensure_built")
 def test_clean_up_to(bsfile):
     """
