@@ -25,7 +25,7 @@ Usage
 Create a file called boatswain.yml for your project with the following
 syntax, which is heavily based on docker-compose.
 
-:: yaml
+.. code-block:: yaml
 
     version: 1.0                    # The version of the boatswain yaml
     organisation: boatswain         # Your dockerhub organisation
