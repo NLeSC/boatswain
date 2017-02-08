@@ -69,7 +69,7 @@ def image_names(file):
         All image names fully qualified with their organisation
         in both test boatswain files
     """
-    images = file['images'].keys()
+    images = list(file['images'])
 
     for key in file['images']:
         image = file['images'][key]
