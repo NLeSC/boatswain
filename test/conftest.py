@@ -113,7 +113,9 @@ def ensure_clean(image_names):
     docker_images = client.images.list(all=True)
     for image in docker_images:
         if any(name in image.tags for name in image_names):
-            client.images.remove(image.id)
+            # Forcing removing, we will remove any image
+            # that depends on this one later in the loop
+            client.images.remove(image.id, force=True)
 
     try:
         client.images.remove("alpine:latest")
