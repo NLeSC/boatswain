@@ -64,33 +64,60 @@ def bsfile_fail():
 
 
 @pytest.fixture
-def image_names(bsfile, bsfile_fail):
+def image_names(file):
     """
         All image names fully qualified with their organisation
         in both test boatswain files
     """
-    org = bsfile['organisation']
-    images = [posixpath.join(org, name) for name
-              in bsfile['images'].keys()]
+    images = file['images'].keys()
 
-    for key in bsfile['images']:
-        image = bsfile['images'][key]
+    for key in file['images']:
+        image = file['images'][key]
         if 'tag' in image:
-            images.append(posixpath.join(org, image['tag']))
-
-    org = bsfile_fail['organisation']
-    images += [posixpath.join(org, name) for name
-               in bsfile_fail['images'].keys()]
-    for key in bsfile_fail['images']:
-        image = bsfile_fail['images'][key]
-        if 'tag' in image:
-            images.append(posixpath.join(org, image['tag']))
+            images.append(image['tag'])
 
     return images
 
 
+def full_image_names(names, org):
+    return [full_name(name, org) for name in names]
+
+
+def full_name(name, org):
+    return posixpath.join(org, name)
+
+
+def sort_by_dependency(names, images):
+    """
+        Make sure images that have dependencies are last
+    """
+    dependencies = []
+    while len(names):
+        name = names.pop(0)  # get the first image name
+        if name in images:
+            definition = images[name]
+            # check if it has a dependency
+            if 'from' in definition and definition['from'] in names:
+                # Move this one to the back, because we first need to
+                # remove another image that this one depends on
+                names.append(name)
+            else:
+                dependencies.append(name)
+    return dependencies
+
+
+def check_if_exists(client, tag):
+    """
+        Check whether this image exists.
+    """
+    try:
+        client.images.get(tag)
+        return True
+    except docker.errors.ImageNotFound:
+        return False
+
 @pytest.fixture
-def ensure_clean(image_names):
+def ensure_clean(bsfile, bsfile_fail):
     """
         Make sure the images in the boatswain file
         do not exist without using any boatswain
@@ -99,23 +126,35 @@ def ensure_clean(image_names):
         Also do not remove any exisisting containers
         or images on the system
     """
+    bs_org = bsfile['organisation']
+    bs_image_names = image_names(bsfile)
+
+    fail_org = bsfile_fail['organisation']
+    fail_image_names = image_names(bsfile_fail)
+
+    full_names = full_image_names(bs_image_names, bs_org)
+    full_names += full_image_names(fail_image_names, fail_org)
+
     client = docker.from_env()
     containers = client.containers.list(all=True)
     for container in containers:
         image_id = container.attrs['Image']
         image = client.images.get(image_id)
-        if any(name in image.tags for name in image_names):
+        if any(name in image.tags for name in full_names):
             # This container is based on one of the test images
             # so we remove it
             container.stop()
             container.remove()
 
-    docker_images = client.images.list(all=True)
+    docker_images = sort_by_dependency(bs_image_names, bsfile['images'])
     for image in docker_images:
-        if any(name in image.tags for name in image_names):
-            # Forcing removing, we will remove any image
-            # that depends on this one later in the loop
-            client.images.remove(image.id, force=True)
+        if check_if_exists(client, image):
+            client.images.remove(full_name(image, bs_org))
+
+    docker_images = sort_by_dependency(fail_image_names, bsfile_fail['images'])
+    for image in docker_images:
+        if check_if_exists(client, image):
+            client.images.remove(full_name(image, fail_org))
 
     try:
         client.images.remove("alpine:latest")
