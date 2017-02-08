@@ -1,14 +1,14 @@
 version: 1.0
 organisation: boatswain
 images:
-    image1:
+    image1:pytest:
         context: docker/image1
-    image2:
+    image2:pytest:
         context: docker/image2
-        from: image1
-    image3:
+        from: image1:pytest
+    image3:pytest:
         context: docker/image3
-        from: image2
-    image4:
+        from: image2:pytest
+    image4:pytest:
         context: docker/image4
-        tag: image12
+        tag: image12:pytest

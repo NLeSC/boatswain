@@ -43,6 +43,6 @@ def test_find_dependencies(bsfile):
     """
         Find all dependencies of an image
     """
-    dependencies = find_dependencies("image3", bsfile['images'])
+    dependencies = find_dependencies("image3:pytest", bsfile['images'])
     assert sorted(dependencies, key=str.lower) == sorted(
-        ["image3", "image2", "image1"], key=str.lower)
+        ["image3:pytest", "image2:pytest", "image1:pytest"], key=str.lower)
