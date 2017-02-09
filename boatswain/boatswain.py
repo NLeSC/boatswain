@@ -24,6 +24,7 @@ from __future__ import absolute_import, print_function
 import logging
 import posixpath
 import json
+import threading
 
 import docker
 import progressbar
@@ -51,10 +52,21 @@ class Boatswain(object):
     """
 
     def __init__(self, description):
+        self.logger = logging.getLogger('boatswain')
+
+        # Docker interaction
         self.client = docker.from_env(version="auto")
         self.description = description
+
+        # Cache of images built by boatswain
         self.cache = {}
-        self.logger = logging.getLogger('boatswain')
+
+        # Progress
+        self.progress_bar = None
+        self.done = False
+        self.total = None
+        self.step = None
+
         if 'organisation' in self.description:
             self.organisation = self.description['organisation']
         else:
@@ -295,13 +307,29 @@ class Boatswain(object):
 
         return tag
 
+
+    def update_progress(self):
+        """
+            Scheduled task to update progress bar every second
+        """
+        if self.progress_bar:
+            self.progress_bar.update(self.step)
+
+        if not self.done:
+            timer = threading.Timer(1, self.update_progress)
+            timer.start()
+
     def _build_one(self, name, tag, directory, force=False, verbose=False):
         """
             Build one image using the low level docker-py api
         """
         gen = self.client.api.build(path=directory, tag=tag, rm=True,
                                     nocache=force)
-        progress_bar = None
+        self.progress_bar = None
+        timer = None
+        running_container = False
+        self.done = False
+
         # The build function returns a generator with what would normally
         # be the console output. Here we parse it to find which step we
         # are on (e.g. the layer)
@@ -332,25 +360,29 @@ class Boatswain(object):
                 else:
                     print(bcolors.blue(line), end="")
             if line.startswith('Step'):
-                step, total = extract_step(line)
-                if progress_bar is None:
-                    if total is None:
-                        total = progressbar.UnknownLength
-                    progress_bar = \
-                        progressbar.ProgressBar(max_value=total,
-                                                redirect_stdout=True)
+                self.step, self.total = extract_step(line)
+                if self.progress_bar is None:
+                    if self.total is None:
+                        self.total = progressbar.UnknownLength
+                    self.progress_bar = progressbar.ProgressBar(
+                        max_value=self.total, redirect_stdout=True).start()
 
-                    progress_bar.update(step)
-                else:
-                    progress_bar.update(step)
-            elif line.startswith('Successfully built'):
+                    self.progress_bar.update(self.step)
+
+                    timer = threading.Timer(1, self.update_progress)
+                    timer.start()
+
+            if line.startswith('Successfully built'):
                 ident = extract_id(line)
                 self.cache[name] = ident
+                self.done = True
             elif line.startswith(' ---> Running in '):
                 running_container = extract_container_id(line)
+                if verbose:
+                    print("Running container is now "+bcolors.blue(running_container))
             elif line.startswith('Removing intermediate container'):
                 container_id = extract_container_id_removal(line)
-                if container_id == running_container:
+                if running_container and container_id == running_container:
                     running_container = False
                 else:
                     raise Exception("Docker is removing container with id: " +
@@ -358,8 +390,9 @@ class Boatswain(object):
                                     " while we expected id: " +
                                     bcolors.blue(running_container))
 
-        if progress_bar is not None:
-            progress_bar.finish()
+        if self.progress_bar is not None:
+            self.progress_bar.finish()
+            self.progress_bar = None
 
         if ident:
             return ident

@@ -38,4 +38,4 @@ class bcolors:
 
     @staticmethod
     def _wrap(color, string):
-        return color + string + bcolors.ENDC
+        return color + str(string) + bcolors.ENDC
