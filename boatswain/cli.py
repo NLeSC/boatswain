@@ -29,7 +29,7 @@ def argparser():
     #
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument(
-        '--verbose', '-v', help="Verbose output",
+        '-v', '--verbose', help="Verbose output",
         action='store_true'
     )
     common.add_argument(
@@ -41,7 +41,7 @@ def argparser():
         action='store_true'
     )
     common.add_argument(
-        '--boatswain_file', '-b', help='Override the default boatswain file',
+        '-b', '--boatswain_file', help='Override the default boatswain file',
         default='boatswain.yml'
     )
 
@@ -53,7 +53,7 @@ def argparser():
         parents=[common]
     )
     buildparser.add_argument(
-        '--force', '-f',
+        '-f', '--force',
         help="Force building images even if they already exists",
         action='store_true'
     )

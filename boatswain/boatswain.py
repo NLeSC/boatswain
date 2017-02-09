@@ -28,10 +28,10 @@ import threading
 
 import docker
 import progressbar
+from progressbar import Percentage, Bar, Timer, SimpleProgress
 
 from .bcolors import bcolors
-from .util import find_dependencies, extract_step, extract_id, \
-    extract_container_id_removal, extract_container_id
+from .util import find_dependencies, extract_step, extract_id
 
 
 class Boatswain(object):
@@ -63,6 +63,7 @@ class Boatswain(object):
 
         # Progress
         self.progress_bar = None
+        self.timer = None
         self.done = False
         self.total = None
         self.step = None
@@ -194,8 +195,13 @@ class Boatswain(object):
               " and tagging as " + bcolors.blue(tag))
 
         if not dryrun:
-            ident = self._build_one(
-                name, tag, directory, force=force, verbose=verbose)
+            try:
+                ident = self._build_one(
+                    name, tag, directory, force=force, verbose=verbose)
+            except (Exception, KeyboardInterrupt, SystemExit):
+                if self.timer and self.timer.is_alive:
+                    self.timer.cancel()
+                raise
         else:
             ident = 'testidentifier'
             self.cache[name] = ident
@@ -307,17 +313,19 @@ class Boatswain(object):
 
         return tag
 
-
     def update_progress(self):
         """
             Scheduled task to update progress bar every second
         """
-        if self.progress_bar:
-            self.progress_bar.update(self.step)
-
         if not self.done:
-            timer = threading.Timer(1, self.update_progress)
-            timer.start()
+            self.timer.cancel()
+
+            if self.progress_bar:
+                self.progress_bar.update(self.step)
+
+            if not self.timer.is_alive:
+                self.timer = threading.Timer(1.1, self.update_progress)
+                self.timer.start()
 
     def _build_one(self, name, tag, directory, force=False, verbose=False):
         """
@@ -326,8 +334,6 @@ class Boatswain(object):
         gen = self.client.api.build(path=directory, tag=tag, rm=True,
                                     nocache=force)
         self.progress_bar = None
-        timer = None
-        running_container = False
         self.done = False
 
         # The build function returns a generator with what would normally
@@ -365,34 +371,28 @@ class Boatswain(object):
                     if self.total is None:
                         self.total = progressbar.UnknownLength
                     self.progress_bar = progressbar.ProgressBar(
-                        max_value=self.total, redirect_stdout=True).start()
+                        max_value=self.total, redirect_stdout=True,
+                        widgets=[Percentage(), ' (', SimpleProgress(), ' )',
+                                 ' ', Bar(), ' ', Timer()]).start()
 
                     self.progress_bar.update(self.step)
 
-                    timer = threading.Timer(1, self.update_progress)
-                    timer.start()
+                    self.timer = threading.Timer(1, self.update_progress)
+                    self.timer.start()
+                else:
+                    self.progress_bar.update(self.step)
 
             if line.startswith('Successfully built'):
                 ident = extract_id(line)
                 self.cache[name] = ident
                 self.done = True
-            elif line.startswith(' ---> Running in '):
-                running_container = extract_container_id(line)
-                if verbose:
-                    print("Running container is now "+bcolors.blue(running_container))
-            elif line.startswith('Removing intermediate container'):
-                container_id = extract_container_id_removal(line)
-                if running_container and container_id == running_container:
-                    running_container = False
-                else:
-                    raise Exception("Docker is removing container with id: " +
-                                    bcolors.blue(container_id) +
-                                    " while we expected id: " +
-                                    bcolors.blue(running_container))
 
         if self.progress_bar is not None:
             self.progress_bar.finish()
             self.progress_bar = None
+
+        if self.timer:
+            self.timer.cancel()
 
         if ident:
             return ident
