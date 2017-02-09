@@ -12,3 +12,7 @@ images:
     image4:pytest:
         context: docker/image4
         tag: image12:pytest
+    longimage:pytest:
+        context: docker/longimage
+    image1_fail:pytest:
+        context: docker/image1_fail

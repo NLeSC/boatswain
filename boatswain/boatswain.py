@@ -22,6 +22,7 @@
 from __future__ import absolute_import, print_function
 
 import logging
+import sys
 import posixpath
 import json
 import threading
@@ -32,6 +33,7 @@ from progressbar import Percentage, Bar, Timer, SimpleProgress
 
 from .bcolors import bcolors
 from .util import find_dependencies, extract_step, extract_id
+from .errors import BuildError, ParseError
 
 
 class Boatswain(object):
@@ -138,6 +140,8 @@ class Boatswain(object):
         if not images:
             self.logger.warn('No images defined')
             return []
+        elif name not in images:
+            print(bcolors.fail("Cannot build undefined image " + name))
         else:
             names = find_dependencies(name, images)
             self.logger.debug(names)
@@ -198,9 +202,13 @@ class Boatswain(object):
             try:
                 ident = self._build_one(
                     name, tag, directory, force=force, verbose=verbose)
-            except (Exception, KeyboardInterrupt, SystemExit):
-                if self.timer and self.timer.is_alive:
-                    self.timer.cancel()
+            except (ParseError, BuildError) as error:
+                self.stop_build()
+                print(bcolors.fail("An error occurred during build: " +
+                                   str(error)) + "\n", file=sys.stderr)
+                return False
+            except (KeyboardInterrupt, SystemExit):
+                self.stop_build()
                 raise
         else:
             ident = 'testidentifier'
@@ -318,14 +326,22 @@ class Boatswain(object):
             Scheduled task to update progress bar every second
         """
         if not self.done:
-            self.timer.cancel()
-
             if self.progress_bar:
                 self.progress_bar.update(self.step)
 
-            if not self.timer.is_alive:
                 self.timer = threading.Timer(1.1, self.update_progress)
                 self.timer.start()
+
+    def stop_build(self):
+        """
+            Stop all the build related activities
+        """
+        if self.progress_bar is not None:
+            self.progress_bar.finish()
+            self.progress_bar = None
+
+        if self.timer:
+            self.timer.cancel()
 
     def _build_one(self, name, tag, directory, force=False, verbose=False):
         """
@@ -335,6 +351,7 @@ class Boatswain(object):
                                     nocache=force)
         self.progress_bar = None
         self.done = False
+        self.timer = None
 
         # The build function returns a generator with what would normally
         # be the console output. Here we parse it to find which step we
@@ -347,11 +364,10 @@ class Boatswain(object):
             json_response = json.loads(response.decode("utf-8"))
             self.logger.debug(json_response)
             if 'error' in json_response:
-                raise Exception("Error while building image: ",
-                                json_response)
+                raise BuildError(json_response['error'])
             if not ('stream' in json_response or 'status' in json_response):
-                raise Exception("Unsupported response from docker: ",
-                                json_response)
+                raise ParseError(
+                    "Unsupported docker response: " + str(json_response))
 
             if 'status' in json_response:
                 line = json_response['status']
@@ -387,12 +403,7 @@ class Boatswain(object):
                 self.cache[name] = ident
                 self.done = True
 
-        if self.progress_bar is not None:
-            self.progress_bar.finish()
-            self.progress_bar = None
-
-        if self.timer:
-            self.timer.cancel()
+        self.stop_build()
 
         if ident:
             return ident

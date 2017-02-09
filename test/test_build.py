@@ -46,8 +46,8 @@ def test_build_failing(bsfile_fail):
         Test exception when building image fails
     """
     bosun = Boatswain(bsfile_fail)
-    with pytest.raises(Exception):
-        bosun.build()
+    built = bosun.build()
+    assert not built
 
 
 @pytest.mark.usefixtures("ensure_clean")
