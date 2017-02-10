@@ -434,9 +434,9 @@ class Boatswain(object):
                 self.logger.debug(json_response)
                 if 'error' in json_response:
                     raise BuildError(json_response['error'])
-                if not ('stream' in json_response or            # Sent when building
-                        'status' in json_response or            # Sent when building
-                        'aux' in json_response):                # Sent when pushing
+                if not ('stream' in json_response or     # Sent when building
+                        'status' in json_response or     # Sent when building
+                        'aux' in json_response):         # Sent when pushing
                     raise ParseError(
                         "Unsupported docker response: " + str(json_response))
 
