@@ -36,3 +36,10 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ---------------------
 
  * Initial release
+
+
+.. _0.1.0: https://github.com/nlesc-sherlock/boatswain/commit/f8b85edd3ed9f21c04fa846eae1af7abed8d0d77
+.. _0.2.0: https://github.com/nlesc-sherlock/boatswain/compare/f8b85ed...0.2.0
+.. _0.3.0: https://github.com/nlesc-sherlock/boatswain/compare/0.2.0...0.3.0
+.. _0.4.0: https://github.com/nlesc-sherlock/boatswain/compare/0.3.0...0.4.0
+.. _0.5.0: https://github.com/nlesc-sherlock/boatswain/compare/0.4.0...0.5.0
