@@ -86,7 +86,8 @@ class Boatswain(object):
         """
             Builds all images defined in the dictionary
         """
-        return self._do_action('build', dryrun=dryrun, force=force, verbose=verbose)
+        return self._do_action('build', dryrun=dryrun, force=force,
+                               verbose=verbose)
 
     def clean(self, dryrun=False):
         """
@@ -105,8 +106,8 @@ class Boatswain(object):
         """
             Build all images in the dictionary
         """
-        return self._do_action_dict('build', images, dryrun=dryrun, force=force,
-                                    verbose=verbose)
+        return self._do_action_dict('build', images, dryrun=dryrun,
+                                    force=force, verbose=verbose)
 
     def clean_dict(self, images, dryrun=False):
         """
@@ -159,8 +160,8 @@ class Boatswain(object):
         return self._process_up_to_dict('build', name, images, dryrun=dryrun,
                                         force=force, verbose=verbose)
 
-    def _process_up_to_dict(self, action, name, images, dryrun=False, force=False,
-                            verbose=False):
+    def _process_up_to_dict(self, action, name, images, dryrun=False,
+                            force=False, verbose=False):
         """
            Build image name and all its dependencies from a dictionary
         """
@@ -174,8 +175,8 @@ class Boatswain(object):
             names = find_dependencies(name, images)
             self.logger.debug(names)
             if action == 'build':
-                return self.build_list(names, images, dryrun=dryrun, force=force,
-                                       verbose=verbose)
+                return self.build_list(names, images, dryrun=dryrun,
+                                       force=force, verbose=verbose)
             elif action == 'clean':
                 return self.clean_list(names, images, dryrun=dryrun)
 
@@ -194,10 +195,13 @@ class Boatswain(object):
             # Make sure all the dependencies have been built
             if 'from' in definition and definition['from'] not in self.cache:
                 if definition['from'] not in names:
-                    print(bcolors.fail("Error: could not find a recipe to build ") +
+                    print(bcolors.fail
+                          (
+                              "Error: could not find a recipe to build "
+                          ) +
                           bcolors.blue(definition['from']) +
                           bcolors.fail(" which is needed for ") +
-                          bcolors.blue(name)+ "\n", file=sys.stderr)
+                          bcolors.blue(name) + "\n", file=sys.stderr)
                     # do not append this image
                 else:
                     # Move this one to the back, because it from on another
