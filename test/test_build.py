@@ -93,6 +93,7 @@ def test_build_missing_dependency(bsfile):
     built = bosun.build()
     assert built == ["image4:pytest"]
 
+
 def test_build_missing_context(bsfile):
     """
         Test exception when there is context missing
