@@ -90,9 +90,8 @@ def test_build_missing_dependency(bsfile):
     """
     del bsfile['images']['image1:pytest']
     bosun = Boatswain(bsfile)
-    with pytest.raises(Exception):
-        bosun.build()
-
+    built = bosun.build()
+    assert built == ["image4:pytest"]
 
 def test_build_missing_context(bsfile):
     """
