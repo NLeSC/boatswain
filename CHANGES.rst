@@ -9,6 +9,7 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 `0.5.0`_ (2017-02-10)
 ---------------------
 
+* Implemented push command
 * Build will now greedily try to build images instead of throwing an exception at the first error.
 * Added error messages to failing builds
 * Standardized return values (e.g. always a list)
