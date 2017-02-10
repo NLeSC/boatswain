@@ -74,6 +74,18 @@ def argparser():
         nargs='?'
     )
 
+    #
+    # Push parser
+    #
+    pushparser = subparsers.add_parser(
+        'push', help='Clean the images specified in the boatswain.yml file',
+        parents=[common]
+    )
+    pushparser.add_argument(
+        'imagename', help="Name of the image to clean",
+        nargs='?'
+    )
+
     return parser
 
 
@@ -128,3 +140,10 @@ def main():
             bosun.clean_up_to(arguments.imagename, dryrun=arguments.dryrun)
         else:
             bosun.clean(dryrun=arguments.dryrun)
+
+    elif command == 'push':
+        if arguments.imagename:
+            bosun.push_up_to(arguments.imagename, dryrun=arguments.dryrun,
+                             verbose=arguments.verbose)
+        else:
+            bosun.push(dryrun=arguments.dryrun, verbose=arguments.verbose)
