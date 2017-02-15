@@ -38,4 +38,7 @@ class bcolors:
 
     @staticmethod
     def _wrap(color, string):
-        return color + str(string) + bcolors.ENDC
+        the_str = string
+        if type(the_str) == 'bytes':
+            the_str = string.decode()
+        return color + the_str + bcolors.ENDC
