@@ -9,6 +9,7 @@ import logging
 import yaml
 from .boatswain import Boatswain
 from .bcolors import bcolors
+from .display import Tree
 
 
 def argparser():
@@ -86,6 +87,15 @@ def argparser():
         nargs='?'
     )
 
+
+    #
+    # Tree parser
+    #
+    subparsers.add_parser(
+        'tree', help='Print the tree of the boatswain.yml file',
+        parents=[common]
+    )
+
     return parser
 
 
@@ -147,3 +157,6 @@ def main():
                              verbose=arguments.verbose)
         else:
             bosun.push(dryrun=arguments.dryrun, verbose=arguments.verbose)
+    elif command == 'tree':
+        tree = Tree()
+        tree.print_boatswain_tree(bsfile)

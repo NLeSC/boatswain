@@ -490,7 +490,7 @@ class Boatswain(object):
                 self.total = progressbar.UnknownLength
                 widgets = [Counter(), ' ', Bar(), ' ', Timer()]
             else:
-                widgets = [Percentage(), ' (', SimpleProgress(), ' )',
+                widgets = [Percentage(), ' (', SimpleProgress(), ')',
                            ' ', Bar(), ' ', Timer()]
 
             self.progress_bar = progressbar.ProgressBar(

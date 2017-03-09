@@ -6,6 +6,11 @@ This document records all notable changes to Boatswain.
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+Unreleased
+----------
+* Added the tree command which will print the tree of the boatswain file
+
+
 `0.5.0`_ (2017-02-10)
 ---------------------
 
