@@ -9,7 +9,8 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 Unreleased
 ----------
 * Added the tree command which will print the tree of the boatswain file
-
+* Fixed issue with printing unicode text from the docker stream
+* Added quiet and extra verbose modes
 
 `0.5.0`_ (2017-02-10)
 ---------------------

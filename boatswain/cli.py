@@ -34,6 +34,14 @@ def argparser():
         action='store_true'
     )
     common.add_argument(
+        '-vv', '--verboseverbose', help="Very Verbose output",
+        action='store_true'
+    )
+    common.add_argument(
+        '-q', '--quiet', help="Quiet output",
+        action='store_true'
+    )
+    common.add_argument(
         '--dryrun', help="Do a dry run don't actually build",
         action='store_true'
     )
@@ -87,7 +95,6 @@ def argparser():
         nargs='?'
     )
 
-
     #
     # Tree parser
     #
@@ -118,13 +125,14 @@ def main():
         Run the boatswain command using the given arguments
     """
     parser = argparser()
-    print(bcolors.header("Welcome to Boatswain"))
-
     if len(sys.argv) < 1:
         parser.print_help()
         exit_with_message("", 1)
 
     arguments = parser.parse_args()
+
+    if not arguments.quiet:
+        print(bcolors.header("Welcome to Boatswain"))
 
     if arguments.debug:
         logging.basicConfig(level=logging.DEBUG)
@@ -138,12 +146,20 @@ def main():
 
     bosun = Boatswain(bsfile)
 
+    verbosity_level = 1     # standard verbosity
+    if arguments.quiet:
+        verbosity_level = 0
+    elif arguments.verbose:
+        verbosity_level = 2
+    elif arguments.verboseverbose:
+        verbosity_level = 3
+
     if command == 'build':
         if arguments.imagename:
             bosun.build_up_to(arguments.imagename, dryrun=arguments.dryrun,
-                              verbose=arguments.verbose, force=arguments.force)
+                              verbose=verbosity_level, force=arguments.force)
         else:
-            bosun.build(dryrun=arguments.dryrun, verbose=arguments.verbose,
+            bosun.build(dryrun=arguments.dryrun, verbose=verbosity_level,
                         force=arguments.force)
     elif command == 'clean':
         if arguments.imagename:
@@ -154,9 +170,9 @@ def main():
     elif command == 'push':
         if arguments.imagename:
             bosun.push_up_to(arguments.imagename, dryrun=arguments.dryrun,
-                             verbose=arguments.verbose)
+                             verbose=verbosity_level)
         else:
-            bosun.push(dryrun=arguments.dryrun, verbose=arguments.verbose)
+            bosun.push(dryrun=arguments.dryrun, verbose=verbosity_level)
     elif command == 'tree':
         tree = Tree()
         tree.print_boatswain_tree(bsfile)

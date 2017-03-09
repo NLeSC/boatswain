@@ -82,7 +82,7 @@ class Boatswain(object):
             self.images = {}
             self.logger.warn("No images defined in the boatswain description")
 
-    def build(self, dryrun=False, force=False, verbose=False):
+    def build(self, dryrun=False, force=False, verbose=1):
         """
             Builds all images defined in the dictionary
         """
@@ -95,7 +95,7 @@ class Boatswain(object):
         """
         return self._do_action('clean', dryrun=dryrun)
 
-    def push(self, dryrun=False, verbose=False):
+    def push(self, dryrun=False, verbose=1):
         """
             Push the images defined in the dictionary to the repository
         """
@@ -108,7 +108,7 @@ class Boatswain(object):
         else:
             return self._do_action_dict(action, self.images, **kwargs)
 
-    def build_dict(self, images, dryrun=False, force=False, verbose=False):
+    def build_dict(self, images, dryrun=False, force=False, verbose=1):
         """
             Build all images in the dictionary
         """
@@ -121,7 +121,7 @@ class Boatswain(object):
         """
         return self._do_action_dict('clean', images, dryrun=dryrun)
 
-    def push_dict(self, images, dryrun=False, verbose=False):
+    def push_dict(self, images, dryrun=False, verbose=1):
         """
             Remove all images in the dictionary
         """
@@ -150,7 +150,7 @@ class Boatswain(object):
         """
         return self.clean_up_to_dict(name, self.images, dryrun=dryrun)
 
-    def build_up_to(self, name, dryrun=False, force=False, verbose=False):
+    def build_up_to(self, name, dryrun=False, force=False, verbose=1):
         """
             Builds the image with the given name and all of
             the images it depends on recursively
@@ -158,7 +158,7 @@ class Boatswain(object):
         return self.build_up_to_dict(name, self.images, dryrun=dryrun,
                                      force=force, verbose=verbose)
 
-    def push_up_to(self, name, dryrun=False, verbose=False):
+    def push_up_to(self, name, dryrun=False, verbose=1):
         """
             Pushes the image with the given name and all of
             the images it depends on recursively
@@ -175,7 +175,7 @@ class Boatswain(object):
                                         dryrun=dryrun)
 
     def build_up_to_dict(self, name, images, dryrun=False, force=False,
-                         verbose=False):
+                         verbose=1):
         """
             Builds the image with the given name and all
             of the images it depends on recursively
@@ -183,7 +183,7 @@ class Boatswain(object):
         return self._process_up_to_dict('build', name, images, dryrun=dryrun,
                                         force=force, verbose=verbose)
 
-    def push_up_to_dict(self, name, images, dryrun=False, verbose=False):
+    def push_up_to_dict(self, name, images, dryrun=False, verbose=1):
         """
             Pushes the image with the given name and all of
             the images it depends on recursively
@@ -192,7 +192,7 @@ class Boatswain(object):
                                         dryrun=dryrun, verbose=verbose)
 
     def _process_up_to_dict(self, action, name, images, dryrun=False,
-                            force=False, verbose=False):
+                            force=False, verbose=1):
         """
            Build image name and all its dependencies from a dictionary
         """
@@ -215,7 +215,7 @@ class Boatswain(object):
                                       verbose=verbose)
 
     def build_list(self, names, images, dryrun=False, force=False,
-                   verbose=False):
+                   verbose=1):
         """
             Builds the all images given in names and all the dependencies
             of these images
@@ -267,7 +267,7 @@ class Boatswain(object):
                     cleaned.append(name)
         return cleaned
 
-    def push_list(self, names, images, dryrun=False, verbose=False):
+    def push_list(self, names, images, dryrun=False, verbose=1):
         """
             Removes all images defined in the list
         """
@@ -288,7 +288,7 @@ class Boatswain(object):
         return pushed
 
     def build_one(self, name, definition, dryrun=False, force=False,
-                  verbose=False):
+                  verbose=1):
         """
             Builds a single docker image.
             The image this docker image depends on should already be built!
@@ -304,9 +304,10 @@ class Boatswain(object):
         else:
             raise Exception("No context defined in file, aborting")
 
-        print("Now building " + bcolors.blue(name) +
-              " in directory " + bcolors.blue(directory) +
-              " and tagging as " + bcolors.blue(tag))
+        if verbose > 1:
+            print("Now building " + bcolors.blue(name) +
+                  " in directory " + bcolors.blue(directory) +
+                  " and tagging as " + bcolors.blue(tag))
 
         if not dryrun:
             try:
@@ -325,32 +326,35 @@ class Boatswain(object):
             ident = 'testidentifier'
             self.cache[name] = ident
 
-        print("Successfully built image with tag:" + bcolors.blue(tag) +
-              " docker id is: " + bcolors.blue(ident))
+        if verbose > 1:
+            print("Successfully built image with tag:" + bcolors.blue(tag) +
+                  " docker id is: " + bcolors.blue(ident))
 
         return True
 
-    def clean_one(self, name, definition, dryrun=False):
+    def clean_one(self, name, definition, verbose=1, dryrun=False):
         """
             Removes the specified image if it exists
         """
         tag = self._get_full_tag(name, definition)
         exists = self._check_if_exists(tag)
         if exists:
-            print("removing image with tag: " + bcolors.blue(tag))
+            if verbose > 1:
+                print("removing image with tag: " + bcolors.blue(tag))
             if not dryrun:
                 self.client.images.remove(tag)
             return True
         return False
 
-    def push_one(self, name, definition, dryrun=False, verbose=False):
+    def push_one(self, name, definition, dryrun=False, verbose=1):
         """
             Push the specified image if it exists
         """
         tag = self._get_full_tag(name, definition)
         exists = self._check_if_exists(tag)
         if exists:
-            print("Pushing image with tag: " + bcolors.blue(tag))
+            if verbose > 1:
+                print("Pushing image with tag: " + bcolors.blue(tag))
             if not dryrun:
                 try:
                     generator = self.client.images.push(tag, stream=True)
@@ -413,7 +417,7 @@ class Boatswain(object):
         if self.timer:
             self.timer.cancel()
 
-    def _docker_progress(self, name, generator, has_step=True, verbose=False):
+    def _docker_progress(self, name, generator, has_step=True, verbose=1):
         self.progress_bar = None
         self.done = False
         self.timer = None
@@ -425,7 +429,9 @@ class Boatswain(object):
         # are on (e.g. the layer)
         # and whether it was successfully built, although if it does not
         # build successfully we will get an Exception
-        if verbose:
+        if verbose > 0:
+            print(bcolors.blue(name))
+        if verbose > 2:
             print(bcolors.warning(name + ": "), end="")
 
         try:
@@ -452,7 +458,7 @@ class Boatswain(object):
                     # Docker 1.13 push gives aux when push is done
                     ident = json_response['aux']['Digest'][7:]
 
-                if verbose and 'status' not in json_response:
+                if verbose > 2 and 'status' not in json_response:
                     if line.endswith("\n"):
                         print(bcolors.blue(line), end="")
                         print(bcolors.warning(name + ": "), end="")
@@ -464,7 +470,7 @@ class Boatswain(object):
                 elif not has_step:
                     self.step += 1
 
-                self.create_progress_bar()
+                self.create_progress_bar(name)
                 self.progress_bar.update(self.step)
 
                 if line.startswith('Successfully built'):
@@ -481,7 +487,7 @@ class Boatswain(object):
         except docker.errors.APIError as error:
             raise BuildError(str(error))
 
-    def create_progress_bar(self):
+    def create_progress_bar(self, name):
         """
             Initialize the progress bar
         """

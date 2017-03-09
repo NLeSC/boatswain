@@ -5,6 +5,7 @@ import sys
 
 from .bcolors import bcolors
 
+
 class Node(object):
     def __init__(self, label):
         self.label = label
@@ -26,12 +27,13 @@ class Node(object):
                     return child
         return False
 
+
 class Tree(object):
-    _child = u'\u251c'        # ├
-    _bar_space = u'\u2502   ' # │ + 3 spaces
-    _last_child = u'\u2514'   # └
-    _dash = u'\u2500\u2500'   # ──
-    _space = u'    '          # 4 spaces
+    _child = u'\u251c'         # ├
+    _bar_space = u'\u2502   '  # │ + 3 spaces
+    _last_child = u'\u2514'    # └
+    _dash = u'\u2500\u2500'    # ──
+    _space = u'    '           # 4 spaces
 
     def __init__(self):
         self.cache = []
@@ -39,7 +41,7 @@ class Tree(object):
 
     def print_boatswain_tree(self, boatswain):
         self.cache = []
-        tree = self.extract_tree(boatswain)
+        self.extract_tree(boatswain)
         self.print_tree()
 
     def extract_tree(self, yamlfile):
@@ -51,13 +53,18 @@ class Tree(object):
 
             if 'from' in definition:
                 if definition['from'] not in self.cache:
-                    # We depend on another image that has not been processed yet
+                    # We depend on another image that has
+                    # not been processed yet
                     if definition['from'] not in names:
                         # Zomg it doesn't exists :O
-                        print(bcolors.fail("Error: could not find a recipe for ") +
-                              bcolors.blue(definition['from']) +
-                              bcolors.fail(" which is needed for ") +
-                              bcolors.blue(name) + "\n", file=sys.stderr)
+                        print(
+                            bcolors.fail(
+                                "Error: could not find a recipe for "
+                            ) +
+                            bcolors.blue(definition['from']) +
+                            bcolors.fail(" which is needed for ") +
+                            bcolors.blue(name) + "\n", file=sys.stderr
+                        )
                     else:
                         # The parent image still needs to be processed
                         names.append(name)
@@ -95,6 +102,6 @@ class Tree(object):
 
             if len(node.children) > 0:
                 for index, child in enumerate(node.children):
-                    last.append(index == (len(node.children)-1))
+                    last.append(index == (len(node.children) - 1))
                     self.print_recursive(child, last)
                     last.pop()

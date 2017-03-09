@@ -3,9 +3,7 @@
 
     Currently tests only very basic things
 """
-import pytest
-import docker
-from boatswain import Boatswain, Tree
+from boatswain import Tree
 
 
 def test_extract(bsfile):
@@ -18,6 +16,7 @@ def test_find_child(bsfile):
     tree = Tree()
     root = tree.extract_tree(bsfile)
     assert root.find_child('image3:pytest')
+
 
 def test_print(bsfile):
     tree = Tree()
