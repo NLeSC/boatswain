@@ -6,11 +6,15 @@ This document records all notable changes to Boatswain.
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-Unreleased
-----------
+`0.6.0`_ (2017-03-09)
+--------------------
+
 * Added the tree command which will print the tree of the boatswain file
-* Fixed issue with printing unicode text from the docker stream
 * Added quiet and extra verbose modes
+
+`0.5.1`_ (2017-02-10)
+
+* Fixed issue with printing unicode text from the docker stream
 
 `0.5.0`_ (2017-02-10)
 ---------------------
@@ -51,3 +55,5 @@ Unreleased
 .. _0.3.0: https://github.com/nlesc-sherlock/boatswain/compare/0.3.0...0.2.0
 .. _0.4.0: https://github.com/nlesc-sherlock/boatswain/compare/0.4.0...0.3.0
 .. _0.5.0: https://github.com/nlesc-sherlock/boatswain/compare/0.5.0...0.4.0
+.. _0.5.1: https://github.com/nlesc-sherlock/boatswain/compare/0.5.1...0.5.0
+.. _0.6.0: https://github.com/nlesc-sherlock/boatswain/compare/0.6.0...0.5.1
