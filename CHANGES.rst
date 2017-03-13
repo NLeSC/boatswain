@@ -6,6 +6,11 @@ This document records all notable changes to Boatswain.
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+Unreleased
+----------
+
+* Added a 'files' key to the build definition. This is a list of files that need to be staged into the context directory.
+
 `0.6.0`_ (2017-03-09)
 --------------------
 

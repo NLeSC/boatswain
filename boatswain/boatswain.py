@@ -26,6 +26,7 @@ import sys
 import posixpath
 import json
 import threading
+import subprocess
 
 import docker
 import progressbar
@@ -287,6 +288,22 @@ class Boatswain(object):
                     pushed.append(name)
         return pushed
 
+    def stage_files(definition, verbose=1, dryrun=False):
+        if verbose > 1:
+            print(bcolors.blue("Pre-build file staging"))
+        files = definition['files']
+        directory = definition['context']
+        for afile in files:
+            output = None
+            if verbose > 2:
+                output = sys.stdout
+            if not dryrun:
+                if verbose > 1:
+                    print('cp', '-u', '-R', afile, directory)
+                subprocess.check_call(["cp", "-u", "-R", afile, directory], stdout=output, stderr=sys.stderr)
+            else:
+                print('cp', '-u', '-R', afile, directory)
+
     def build_one(self, name, definition, dryrun=False, force=False,
                   verbose=1):
         """
@@ -304,10 +321,13 @@ class Boatswain(object):
         else:
             raise Exception("No context defined in file, aborting")
 
-        if verbose > 1:
+        if verbose > 1 or dryrun:
             print("Now building " + bcolors.blue(name) +
                   " in directory " + bcolors.blue(directory) +
                   " and tagging as " + bcolors.blue(tag))
+
+        if 'files' in definition:
+            self.stage_files(definition, verbose=verbose, dryrun=dryrun)
 
         if not dryrun:
             try:
@@ -326,7 +346,7 @@ class Boatswain(object):
             ident = 'testidentifier'
             self.cache[name] = ident
 
-        if verbose > 1:
+        if verbose > 1 or dryrun:
             print("Successfully built image with tag:" + bcolors.blue(tag) +
                   " docker id is: " + bcolors.blue(ident))
 
