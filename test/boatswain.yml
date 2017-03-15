@@ -9,9 +9,14 @@ images:
     image3:pytest:
         context: docker/image3
         from: image2:pytest
-    image4:pytest:
+        before:
+            command:
+                - cp -u ../README.rst docker/image3/
+    image4:1.0:
         context: docker/image4
         tag: image12:pytest
+    image4:2.0:
+        context: docker/image4
     longimage:pytest:
         context: docker/longimage
     image1_fail:pytest:

@@ -21,20 +21,22 @@
 """
 from __future__ import absolute_import, print_function
 
-import logging
-import sys
-import posixpath
 import json
-import threading
+import logging
+import os
+import posixpath
+import shlex
 import subprocess
+import sys
+import threading
 
 import docker
 import progressbar
-from progressbar import Percentage, Bar, Timer, SimpleProgress, Counter
+from progressbar import Percentage, BouncingBar, SimpleProgress, Bar, Timer, Counter
 
 from .bcolors import bcolors
-from .util import find_dependencies, extract_step, extract_id
 from .errors import BuildError, ParseError
+from .util import extract_id, extract_step, find_dependencies
 
 
 class Boatswain(object):
@@ -288,21 +290,22 @@ class Boatswain(object):
                     pushed.append(name)
         return pushed
 
-    def stage_files(definition, verbose=1, dryrun=False):
+    def before_command(self, definition, verbose=1, dryrun=False):
         if verbose > 1:
-            print(bcolors.blue("Pre-build file staging"))
-        files = definition['files']
-        directory = definition['context']
-        for afile in files:
+            print(bcolors.blue("Pre-build staging"))
+        commands = definition['before']['command']
+        for command in commands:
             output = None
+
+            args = shlex.split(command)
             if verbose > 2:
                 output = sys.stdout
             if not dryrun:
                 if verbose > 1:
-                    print('cp', '-u', '-R', afile, directory)
-                subprocess.check_call(["cp", "-u", "-R", afile, directory], stdout=output, stderr=sys.stderr)
+                    print("Running: ", args, " from directory ", os.getcwd())
+                subprocess.check_call(args, stdout=output, stderr=sys.stderr)
             else:
-                print('cp', '-u', '-R', afile, directory)
+                print(os.getcwd(), "> ", args)
 
     def build_one(self, name, definition, dryrun=False, force=False,
                   verbose=1):
@@ -326,8 +329,8 @@ class Boatswain(object):
                   " in directory " + bcolors.blue(directory) +
                   " and tagging as " + bcolors.blue(tag))
 
-        if 'files' in definition:
-            self.stage_files(definition, verbose=verbose, dryrun=dryrun)
+        if 'before' in definition and 'command' in definition['before']:
+            self.before_command(definition, verbose=verbose, dryrun=dryrun)
 
         if not dryrun:
             try:
@@ -449,7 +452,7 @@ class Boatswain(object):
         # are on (e.g. the layer)
         # and whether it was successfully built, although if it does not
         # build successfully we will get an Exception
-        if verbose > 0:
+        if verbose > 1:
             print(bcolors.blue(name))
         if verbose > 2:
             print(bcolors.warning(name + ": "), end="")
@@ -490,8 +493,9 @@ class Boatswain(object):
                 elif not has_step:
                     self.step += 1
 
-                self.create_progress_bar(name)
-                self.progress_bar.update(self.step)
+                if verbose > 1:
+                    self.create_progress_bar(name)
+                    self.progress_bar.update(self.step)
 
                 if line.startswith('Successfully built'):
                     ident = extract_id(line)
@@ -514,10 +518,12 @@ class Boatswain(object):
         if self.progress_bar is None:
             if self.total is None:
                 self.total = progressbar.UnknownLength
-                widgets = [Counter(), ' ', Bar(), ' ', Timer()]
+                widgets = [Counter(), ' ', BouncingBar(marker=u'\u2588',
+                           left=u'\u2502', right=u'\u2502'), ' ', Timer()]
             else:
                 widgets = [Percentage(), ' (', SimpleProgress(), ')',
-                           ' ', Bar(), ' ', Timer()]
+                           ' ', Bar(marker=u'\u2588',
+                                    left=u'\u2502', right=u'\u2502'), ' ', Timer()]
 
             self.progress_bar = progressbar.ProgressBar(
                 max_value=self.total, redirect_stdout=True,
