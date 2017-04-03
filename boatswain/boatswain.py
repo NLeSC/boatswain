@@ -256,8 +256,7 @@ class Boatswain(object):
                         self.progress_bar.update(self.step, imagename=name)
                     built.append(name)
 
-        if verbose == 1:
-            self._stop_progress()
+        self._stop_progress()
         return built
 
     def clean_list(self, names, images, dryrun=False, verbose=1):
@@ -282,8 +281,7 @@ class Boatswain(object):
                         self.step += 1
                         self.progress_bar.update(self.step, imagename=name)
                     cleaned.append(name)
-        if verbose == 1:
-            self._stop_progress()
+        self._stop_progress()
         return cleaned
 
     def push_list(self, names, images, dryrun=False, verbose=1):
@@ -309,8 +307,7 @@ class Boatswain(object):
                         self.step += 1
                         self.progress_bar.update(self.step, imagename=name)
                     pushed.append(name)
-        if verbose == 1:
-            self._stop_progress()
+        self._stop_progress()
         return pushed
 
     def before_command(self, definition, verbose=1, dryrun=False):
@@ -474,8 +471,6 @@ class Boatswain(object):
         # are on (e.g. the layer)
         # and whether it was successfully built, although if it does not
         # build successfully we will get an Exception
-        if verbose > 1:
-            print(bcolors.blue(name))
         if verbose > 2:
             print(bcolors.warning(name + ": "), end="")
 
@@ -517,7 +512,7 @@ class Boatswain(object):
 
                 if verbose > 1:
                     self.create_progress_bar(self.step, self.total, name)
-                    self.progress_bar.update(self.step)
+                    self.progress_bar.update(self.step, name)
 
                 if line.startswith('Successfully built'):
                     ident = extract_id(line)
@@ -545,12 +540,13 @@ class Boatswain(object):
             self.total = total + 1
             if self.total is None:
                 self.total = progressbar.UnknownLength
-                widgets = [Counter(), ' ', BouncingBar(marker=u'\u2588',
-                           left=u'\u2502', right=u'\u2502'), ' ', Timer()]
+                widgets = [DynamicStringMessage('imagename'), ' ', Counter(), ' ',
+                           BouncingBar(marker=u'\u2588', left=u'\u2502', right=u'\u2502'),
+                           ' ', Timer()]
             else:
                 widgets = [DynamicStringMessage('imagename'), ' ', Percentage(), ' (', SimpleProgress(), ')',
-                           ' ', Bar(marker=u'\u2588',
-                                    left=u'\u2502', right=u'\u2502'), ' ', Timer()]
+                           ' ', Bar(marker=u'\u2588', left=u'\u2502', right=u'\u2502'),
+                           ' ', Timer()]
 
             self.progress_bar = progressbar.ProgressBar(
                 max_value=self.total, redirect_stdout=True,

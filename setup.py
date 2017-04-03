@@ -19,7 +19,7 @@ history = open('CHANGES.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='boatswain',
-    version='0.6.0',
+    version='0.7.0',
     url='https://github.com/nlesc-sherlock/boatswain',
     license='Apache Software License',
     author='Berend Weel',
@@ -27,7 +27,7 @@ setup(
     install_requires=[
         'docker>=2.0.0, <3.0.0',
         'PyYAML>=3.12, <4.0',
-        'progressbar2>=3.12.0, <4.0.0'
+        'progressbar2>=3.16.0, <4.0.0'
     ],
     extras_require={
         'registry': ['docker-registry-client>=0.5.1'],
