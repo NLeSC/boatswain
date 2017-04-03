@@ -6,10 +6,12 @@ This document records all notable changes to Boatswain.
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-Unreleased
+`0.7.0`_ (2017-04-03)
 ----------
 
 * Added a 'before' and 'command' key to the build definition. This is a list of commands that need to be staged into the context directory.
+* Default verbosity only shows 1 progress bar for all images
+* Changed progress indication to full white block
 
 `0.6.0`_ (2017-03-09)
 --------------------
@@ -62,3 +64,4 @@ Unreleased
 .. _0.5.0: https://github.com/nlesc-sherlock/boatswain/compare/0.4.0...0.5.0
 .. _0.5.1: https://github.com/nlesc-sherlock/boatswain/compare/0.5.0...0.5.1
 .. _0.6.0: https://github.com/nlesc-sherlock/boatswain/compare/0.5.1...0.6.0
+.. _0.7.0: https://github.com/nlesc-sherlock/boatswain/compare/0.6.0...0.7.0
