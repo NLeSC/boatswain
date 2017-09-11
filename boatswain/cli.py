@@ -87,11 +87,11 @@ def argparser():
     # Push parser
     #
     pushparser = subparsers.add_parser(
-        'push', help='Clean the images specified in the boatswain.yml file',
+        'push', help='Push the images specified in the boatswain.yml file to dockerhub',
         parents=[common]
     )
     pushparser.add_argument(
-        'imagename', help="Name of the image to clean",
+        'imagename', help="Name of the image to push",
         nargs='?'
     )
 
