@@ -12,7 +12,8 @@ env:
 services:
   - docker
 before_install:
-  - sudo apt-get install docker=$DOCKER_VERSION
+  - sudo apt-get install docker-engine=$DOCKER_VERSION
+  - sudo service docker restart
   - docker version
 install:
   - pip install -U pip
