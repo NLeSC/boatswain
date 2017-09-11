@@ -5,9 +5,14 @@ python:
   - "3.4"
   - "3.5"
 sudo: true
+env:
+  - DOCKER_VERSION=1.11.0
+  - DOCKER_VERSION=1.12.0
+  - DOCKER_VERSION=17.05.0
 services:
   - docker
 before_install:
+  - sudo apt-get install docker=$DOCKER_VERSION
   - docker version
 install:
   - pip install -U pip
