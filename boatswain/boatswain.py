@@ -496,7 +496,16 @@ class Boatswain(object):
                     line = json_response['stream']
                 elif 'aux' in json_response:
                     # Docker 1.13 push gives aux when push is done
-                    ident = json_response['aux']['Digest'][7:]
+                    aux = json_response['aux']
+                    from_index = len('sha256:')
+                    if 'Digest' in aux:
+                        ident = aux['Digest'][from_index:]
+                    elif 'ID' in aux:
+                        # sometimes you get an ID key instead of a Digest key
+                        # (we're not sure why at the moment)
+                        ident = aux['ID'][from_index:]
+                    else:
+                        raise Exception("No 'Digest' or 'ID' key in JSON response. Aborting.")
 
                 if verbose > 2 and 'status' not in json_response:
                     if line.endswith("\n"):
