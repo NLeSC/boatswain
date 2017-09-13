@@ -29,6 +29,7 @@ import shlex
 import subprocess
 import sys
 import threading
+import sched, time
 
 import docker
 import progressbar
@@ -69,7 +70,7 @@ class Boatswain(object):
 
         # Progress
         self.progress_bar = None
-        self.timer = None
+        self.scheduler = sched.scheduler(time.time, time.sleep)
         self.total = None
         self.step = None
 
@@ -449,8 +450,7 @@ class Boatswain(object):
             if self.progress_bar:
                 self.progress_bar.update(self.step)
 
-                self.timer = threading.Timer(1, self._update_progress)
-                self.timer.start()
+                self.timer = self.scheduler.enter(1, 1, self._update_progress, argument=())
 
     def _stop_progress(self):
         """
@@ -462,7 +462,7 @@ class Boatswain(object):
             self.done = True
 
         if self.timer:
-            self.timer.cancel()
+            self.scheduler.cancel(self.timer)
             self.timer = None
 
     def _docker_progress(self, name, generator, has_step=True, verbose=1):
@@ -476,56 +476,64 @@ class Boatswain(object):
 
         try:
             for response in generator:
-                json_response = json.loads(response.decode("utf-8"))
-                self.logger.debug(json_response)
-                if 'error' in json_response:
-                    raise BuildError(json_response['error'])
-                if not ('stream' in json_response or     # Sent when building
-                        'status' in json_response or     # Sent when building
-                        'aux' in json_response):         # Sent when pushing
-                    raise ParseError(
-                        "Unsupported docker response: " + str(json_response))
+                lines = response.rstrip().decode('utf-8')
+                lines = lines.replace('\r', '')
 
-                if 'status' in json_response:
-                    line = json_response['status']
-                    # if line.endswith("\n"):
-                    #     print(bcolors.bold(line), end="")
-                    # else:
-                    #     print(bcolors.bold(line))
-                elif 'stream' in json_response:
-                    line = json_response['stream']
-                elif 'aux' in json_response:
-                    # Docker 1.13 push gives aux when push is done
-                    aux = json_response['aux']
-                    from_index = len('sha256:')
-                    if 'Digest' in aux:
-                        ident = aux['Digest'][from_index:]
-                    elif 'ID' in aux:
-                        # sometimes you get an ID key instead of a Digest key
-                        # (we're not sure why at the moment)
-                        ident = aux['ID'][from_index:]
-                    else:
-                        raise Exception("No 'Digest' or 'ID' key in JSON response. Aborting.")
+                lines = lines.split('\n')
 
-                if verbose > 2 and 'status' not in json_response:
-                    if line.endswith("\n"):
-                        print(bcolors.blue(line), end="")
-                        print(bcolors.warning(name + ": "), end="")
-                    else:
-                        print(bcolors.blue(line), end="")
+                for response_line in lines:
+                    json_response = json.loads(response_line)
+                    self.logger.debug(json_response)
+                    if 'error' in json_response:
+                        raise BuildError(json_response['error'])
+                    if not ('stream' in json_response or     # Sent when building
+                            'status' in json_response or     # Sent when building
+                            'aux' in json_response):         # Sent when pushing
+                        raise ParseError(
+                            "Unsupported docker response: " + str(json_response))
 
-                if verbose > 1 and has_step and line.startswith('Step'):
-                    self.step, self.total = extract_step(line)
-                elif verbose > 1 and not has_step:
-                    self.step += 1
+                    if 'status' in json_response:
+                        line = json_response['status'].rstrip()
+                        # if line.endswith("\n"):
+                        #     print(bcolors.bold(line), end="")
+                        # else:
+                        #     print(bcolors.bold(line))
+                    elif 'stream' in json_response:
+                        line = json_response['stream'].rstrip()
+                    elif 'aux' in json_response:
+                        # Docker 1.13 push gives aux when push is done
+                        aux = json_response['aux']
+                        from_index = len('sha256:')
+                        if 'Digest' in aux:
+                            id_line = aux['Digest'].rstrip()
+                            ident = id_line[from_index:]
+                        elif 'ID' in aux:
+                            # sometimes you get an ID key instead of a Digest key
+                            # (we're not sure why at the moment)
+                            id_line = aux['ID'].rstrip()
+                            ident = id_line[from_index:]
+                        else:
+                            raise Exception("No 'Digest' or 'ID' key in JSON response. Aborting.")
 
-                if verbose > 1:
-                    self.create_progress_bar(self.step, self.total, name)
-                    self.progress_bar.update(self.step, name)
+                    if verbose > 2 and 'status' not in json_response:
+                        if line.endswith("\n"):
+                            print(bcolors.blue(line), end="")
+                            print(bcolors.warning(name + ": "), end="")
+                        else:
+                            print(bcolors.blue(line), end="")
 
-                if line.startswith('Successfully built'):
-                    ident = extract_id(line)
-                    self.cache[name] = ident
+                    if verbose > 1 and has_step and line.startswith('Step'):
+                        self.step, self.total = extract_step(line)
+                    elif verbose > 1 and not has_step:
+                        self.step += 1
+
+                    if verbose > 1:
+                        self.create_progress_bar(self.step, self.total, name)
+                        self.progress_bar.update(self.step, name)
+
+                    if line.startswith('Successfully built'):
+                        ident = extract_id(line)
+                        self.cache[name] = ident
 
             if verbose > 1:
                 self._stop_progress()
@@ -563,5 +571,4 @@ class Boatswain(object):
             self.progress_bar.start()
             self.progress_bar.update(self.step, imagename=name)
 
-            self.timer = threading.Timer(1, self._update_progress)
-            self.timer.start()
+            self.timer = self.scheduler.enter(1, 1, self._update_progress, argument=())
