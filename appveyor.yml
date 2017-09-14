@@ -53,6 +53,7 @@ build_script:
 
 install:
   - docker version
+  - docker images -a
   # Add python things to the path
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
 
