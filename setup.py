@@ -23,7 +23,6 @@ setup(
     url='https://github.com/nlesc-sherlock/boatswain',
     license='Apache Software License',
     author='Berend Weel',
-    tests_require=['pytest'],
     install_requires=[
         'docker>=2.0.0, <3.0.0',
         'PyYAML>=3.12, <4.0',
