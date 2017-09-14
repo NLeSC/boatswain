@@ -144,35 +144,35 @@ def main():
     except IOError as error:
         exit_with_message(error.filename + ": " + error.strerror, -error.errno)
 
-    bosun = Boatswain(bsfile)
+    with Boatswain(bsfile) as bosun:
 
-    verbosity_level = 1     # standard verbosity
-    if arguments.quiet:
-        verbosity_level = 0
-    elif arguments.verbose:
-        verbosity_level = 2
-    elif arguments.verboseverbose:
-        verbosity_level = 3
+        verbosity_level = 1     # standard verbosity
+        if arguments.quiet:
+            verbosity_level = 0
+        elif arguments.verbose:
+            verbosity_level = 2
+        elif arguments.verboseverbose:
+            verbosity_level = 3
 
-    if command == 'build':
-        if arguments.imagename:
-            bosun.build_up_to(arguments.imagename, dryrun=arguments.dryrun,
-                              verbose=verbosity_level, force=arguments.force)
-        else:
-            bosun.build(dryrun=arguments.dryrun, verbose=verbosity_level,
-                        force=arguments.force)
-    elif command == 'clean':
-        if arguments.imagename:
-            bosun.clean_up_to(arguments.imagename, dryrun=arguments.dryrun)
-        else:
-            bosun.clean(dryrun=arguments.dryrun)
+        if command == 'build':
+            if arguments.imagename:
+                bosun.build_up_to(arguments.imagename, dryrun=arguments.dryrun,
+                                  verbose=verbosity_level, force=arguments.force)
+            else:
+                bosun.build(dryrun=arguments.dryrun, verbose=verbosity_level,
+                            force=arguments.force)
+        elif command == 'clean':
+            if arguments.imagename:
+                bosun.clean_up_to(arguments.imagename, dryrun=arguments.dryrun)
+            else:
+                bosun.clean(dryrun=arguments.dryrun)
 
-    elif command == 'push':
-        if arguments.imagename:
-            bosun.push_up_to(arguments.imagename, dryrun=arguments.dryrun,
-                             verbose=verbosity_level)
-        else:
-            bosun.push(dryrun=arguments.dryrun, verbose=verbosity_level)
-    elif command == 'tree':
-        tree = Tree()
-        tree.print_boatswain_tree(bsfile)
+        elif command == 'push':
+            if arguments.imagename:
+                bosun.push_up_to(arguments.imagename, dryrun=arguments.dryrun,
+                                 verbose=verbosity_level)
+            else:
+                bosun.push(dryrun=arguments.dryrun, verbose=verbosity_level)
+        elif command == 'tree':
+            tree = Tree()
+            tree.print_boatswain_tree(bsfile)

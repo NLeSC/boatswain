@@ -30,14 +30,11 @@ import subprocess
 import sys
 
 import docker
-import progressbar
-from progressbar import Percentage, BouncingBar, SimpleProgress, Bar, Timer, Counter
 
 from .bcolors import bcolors
 from .errors import BuildError, ParseError
 from .util import extract_id, extract_step, find_dependencies
-from .dynamic_string_message import DynamicStringMessage
-from .timed_update import TimedUpdate
+from .timed_progress_bar import TimedProgressBar
 
 
 class Boatswain(object):
@@ -69,9 +66,6 @@ class Boatswain(object):
 
         # Progress
         self.progress_bar = None
-        self.timer = None
-        self.total = None
-        self.step = None
 
         if 'organisation' in self.description:
             self.organisation = self.description['organisation']
@@ -84,6 +78,16 @@ class Boatswain(object):
             # Should not having images be an exception?
             self.images = {}
             self.logger.warn("No images defined in the boatswain description")
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.progress_bar is not None:
+            self.progress_bar.stop()
+            self.progress_bar = None
+
+        return False
 
     def build(self, dryrun=False, force=False, verbose=1):
         """
@@ -228,7 +232,8 @@ class Boatswain(object):
         self.logger.debug("build_list: %s", names)
 
         if verbose == 1:
-            self.create_progress_bar(0, len(names), "Total")
+            self.progress_bar = TimedProgressBar(0, len(names), "Total")
+            self.progress_bar.start()
         while len(names):
             name = names.pop(0)  # get the first image name
             definition = images[name]
@@ -252,12 +257,14 @@ class Boatswain(object):
                 if self.build_one(name, definition, dryrun=dryrun, force=force,
                                   verbose=verbose):
                     if verbose == 1:
-                        self.step += 1
-                        self.timer.step = self.step
-                        self.timer.imagename = name
+                        self.progress_bar.step += 1
+                        self.progress_bar.imagename = name
+                        self.progress_bar.update()
                     built.append(name)
 
-        self._stop_progress()
+        if verbose == 1:
+            self.progress_bar.stop()
+            self.progress_bar = None
         return built
 
     def clean_list(self, names, images, dryrun=False, verbose=1):
@@ -266,7 +273,8 @@ class Boatswain(object):
         """
         cleaned = []
         if verbose == 1:
-            self.create_progress_bar(0, len(names), "Total")
+            self.progress_bar = TimedProgressBar(0, len(names), "Total")
+            self.progress_bar.start()
         while len(names):
             name = names.pop(0)  # get the first image name
             definition = images[name]
@@ -279,11 +287,13 @@ class Boatswain(object):
             else:
                 if self.clean_one(name, definition, dryrun=dryrun):
                     if verbose == 1:
-                        self.step += 1
-                        self.timer.step = self.step
-                        self.timer.imagename = name
+                        self.progress_bar.step += 1
+                        self.progress_bar.imagename = name
+                        self.progress_bar.update()
                     cleaned.append(name)
-        self._stop_progress()
+        if verbose == 1:
+            self.progress_bar.stop()
+            self.progress_bar = None
         return cleaned
 
     def push_list(self, names, images, dryrun=False, verbose=1):
@@ -292,7 +302,8 @@ class Boatswain(object):
         """
         pushed = []
         if verbose == 1:
-            self.create_progress_bar(0, len(names), "Total")
+            self.progress_bar = TimedProgressBar(0, len(names), "Total")
+            self.progress_bar.start()
         while len(names):
             name = names.pop(0)  # get the first image name
             definition = images[name]
@@ -306,11 +317,13 @@ class Boatswain(object):
                 if self.push_one(name, definition, dryrun=dryrun,
                                  verbose=verbose):
                     if verbose == 1:
-                        self.step += 1
-                        self.timer.step = self.step
-                        self.timer.imagename = name
+                        self.progress_bar.step += 1
+                        self.progress_bar.imagename = name
+                        self.progress_bar.update()
                     pushed.append(name)
-        self._stop_progress()
+        if verbose == 1:
+            self.progress_bar.stop()
+            self.progress_bar = None
         return pushed
 
     def before_command(self, definition, verbose=1, dryrun=False):
@@ -362,12 +375,14 @@ class Boatswain(object):
                 ident = self._docker_progress(name, generator, verbose=verbose)
             except (ParseError, BuildError) as error:
                 if verbose > 1:
-                    self._stop_progress()
+                    self.progress_bar.stop()
+                    self.progress_bar = None
                 print(bcolors.fail("An error occurred during build: " +
                                    str(error)) + "\n", file=sys.stderr)
                 return False
             except (KeyboardInterrupt, SystemExit):
-                self._stop_progress()
+                self.progress_bar.stop()
+                self.progress_bar = None
                 raise
         else:
             ident = 'testidentifier'
@@ -410,13 +425,15 @@ class Boatswain(object):
                                                  verbose=verbose)
                 except (ParseError, BuildError) as error:
                     if verbose > 1:
-                        self._stop_progress()
+                        self.progress_bar.stop()
+                        self.progress_bar = None
                     print(bcolors.fail("An error occurred during build: " +
                                        str(error)) + "\n", file=sys.stderr)
                     return False
                 except (KeyboardInterrupt, SystemExit):
                     if verbose > 1:
-                        self._stop_progress()
+                        self.progress_bar.stop()
+                        self.progress_bar = None
                     raise
             return True
         return False
@@ -444,18 +461,6 @@ class Boatswain(object):
 
         return tag
 
-    def _stop_progress(self):
-        """
-            Stop all the progress related activities
-        """
-        if self.progress_bar is not None:
-            self.progress_bar.finish()
-            self.progress_bar = None
-            self.done = True
-
-        if self.timer:
-            self.timer.done = True
-
     def _docker_progress(self, name, generator, has_step=True, verbose=1):
         # The build function returns a generator with what would normally
         # be the console output. Here we parse it to find which step we
@@ -463,9 +468,13 @@ class Boatswain(object):
         # and whether it was successfully built, although if it does not
         # build successfully we will get an Exception
         if verbose > 2:
-            print(bcolors.warning(name + ": "), end="")
+            print(bcolors.warning(name + ": "))
 
         try:
+            if verbose > 1:
+                step = 0
+                total = 0
+
             for response in generator:
                 lines = response.rstrip().decode('utf-8')
                 lines = lines.replace('\r', '')
@@ -507,29 +516,29 @@ class Boatswain(object):
                             raise Exception("No 'Digest' or 'ID' key in JSON response. Aborting.")
 
                     if verbose > 2 and 'status' not in json_response:
-                        if line.endswith("\n"):
-                            print(bcolors.blue(line), end="")
-                            print(bcolors.warning(name + ": "), end="")
+                        print(bcolors.warning(name + ": "), end="")
+                        print(bcolors.blue(line))
+
+                    if verbose > 1:
+                        if has_step and line.startswith('Step'):
+                            step, total = extract_step(line)
+                        elif not has_step:
+                            step += 1
+
+                        if self.progress_bar is None:
+                            self.progress_bar = TimedProgressBar(step, total, name)
+                            self.progress_bar.start()
                         else:
-                            print(bcolors.blue(line), end="")
-
-                    if verbose > 1 and has_step and line.startswith('Step'):
-                        self.step, self.total = extract_step(line)
-                    elif verbose > 1 and not has_step:
-                        self.step += 1
-
-                    if verbose > 1 and self.progress_bar is None:
-                        self.create_progress_bar(self.step, self.total, name)
-                    else:
-                        # Set the step, the timer will update the progress_bar
-                        self.timer.step = self.step
+                            self.progress_bar.step = step
+                            self.progress_bar.update()
 
                     if line.startswith('Successfully built'):
                         ident = extract_id(line)
                         self.cache[name] = ident
 
             if verbose > 1:
-                self._stop_progress()
+                self.progress_bar.stop()
+                self.progress_bar = None
 
             if ident:
                 return ident
@@ -537,32 +546,6 @@ class Boatswain(object):
                 return False
         except docker.errors.APIError as error:
             if verbose > 1:
-                self._stop_progress()
+                self.progress_bar.stop()
+                self.progress_bar = None
             raise BuildError(str(error))
-
-    def create_progress_bar(self, start, total, name):
-        """
-            Initialize the progress bar
-        """
-        self.done = False
-        self.step = start + 1
-        self.total = total + 1
-        if self.total is None:
-            self.total = progressbar.UnknownLength
-            widgets = [DynamicStringMessage('imagename'), ' ', Counter(), ' ',
-                       BouncingBar(marker=u'\u2588', left=u'\u2502', right=u'\u2502'),
-                       ' ', Timer()]
-        else:
-            widgets = [DynamicStringMessage('imagename'), ' ', Percentage(), ' (', SimpleProgress(), ')',
-                       ' ', Bar(marker=u'\u2588', left=u'\u2502', right=u'\u2502'),
-                       ' ', Timer()]
-
-        self.progress_bar = progressbar.ProgressBar(
-            max_value=self.total, redirect_stdout=True,
-            redirect_stderr=True, widgets=widgets)
-        self.progress_bar.start()
-        self.progress_bar.update(self.step, imagename=name)
-
-        self.timer = TimedUpdate(self.progress_bar, imagename=name)
-        self.timer.step = self.step
-        self.timer.start()
