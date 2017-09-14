@@ -1,6 +1,7 @@
 version: '{branch}-{build}'
 
- matrix:
+environment:
+  matrix:
     # Pre-installed Python versions, which Appveyor may upgrade to
     # a later point release.
     # See: http://www.appveyor.com/docs/installed-software#python
