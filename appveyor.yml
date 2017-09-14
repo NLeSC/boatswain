@@ -51,6 +51,7 @@ build_script:
   - "%CMD_IN_ENV% pip install -e .[test,windows]"
 
 install:
+  - docker version
   # Add python things to the path
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
 
