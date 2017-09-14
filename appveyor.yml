@@ -48,7 +48,7 @@ environment:
 
 build_script:
   # Build the compiled extension
-  - "%CMD_IN_ENV% pip install -e .[test]"
+  - "%CMD_IN_ENV% pip install -e .[test,windows]"
 
 install:
   # Add python things to the path
