@@ -26,7 +26,8 @@ setup(
     install_requires=[
         'docker>=2.0.0, <3.0.0',
         'PyYAML>=3.12, <4.0',
-        'progressbar2>=3.16.0, <4.0.0'
+        'progressbar2>=3.16.0, <4.0.0',
+        'six>=1.10.0, <2.0.0'
     ],
     extras_require={
         'registry': ['docker-registry-client>=0.5.1'],

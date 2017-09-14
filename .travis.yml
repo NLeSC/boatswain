@@ -11,6 +11,6 @@ before_install:
   - docker version
 install:
   - pip install -U pip
-  - pip install -r requirements.txt .
+  - pip install -e .[test]
 script:
   - pytest --flake8 $TESTS
