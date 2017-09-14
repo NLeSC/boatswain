@@ -6,11 +6,19 @@ import posixpath
 import pytest
 import yaml
 import docker
+import platform
 
 from boatswain import Boatswain
 
 
 def boatswain_file():
+    if platform.system() == 'Windows':
+        return boatswain_windows_file()
+    else:
+        return boatswain_linux_file()
+
+
+def boatswain_linux_file():
     """
         The shared boatswain file
     """
@@ -19,20 +27,49 @@ def boatswain_file():
         organisation: boatswain
         images:
             image1:pytest:
-                context: test/docker/image1
+                context: test/docker/linux/image1
             image2:pytest:
-                context: test/docker/image2
+                context: test/docker/linux/image2
                 from: image1:pytest
             image3:pytest:
-                context: test/docker/image3
+                context: test/docker/linux/image3
                 from: image2:pytest
             image4:pytest:
-                context: test/docker/image4
+                context: test/docker/linux/image4
+                tag: image12:pytest
+    """
+
+
+def boatswain_windows_file():
+    """
+        The shared boatswain file
+    """
+    return u"""
+        version: 1.0
+        organisation: boatswain
+        images:
+            image1:pytest:
+                context: test\docker\windows\image1
+            image2:pytest:
+                context: test\docker\windows\image2
+                from: image1:pytest
+            image3:pytest:
+                context: test\docker\windows\image3
+                from: image2:pytest
+            image4:pytest:
+                context: test\docker\windows\image4
                 tag: image12:pytest
     """
 
 
 def boatswain_failing_file():
+    if platform.system() == 'Windows':
+        return boatswain_windows_failing_file()
+    else:
+        return boatswain_linux_failing_file()
+
+
+def boatswain_linux_failing_file():
     """
         A failing boatswain file
     """
@@ -41,7 +78,20 @@ def boatswain_failing_file():
         organisation: boatswain
         images:
             image1fail:pytest:
-                context: test/docker/image1_fail
+                context: test/docker/linux/image1_fail
+    """
+
+
+def boatswain_windows_failing_file():
+    """
+        A failing boatswain file
+    """
+    return u"""
+        version: 1.0
+        organisation: boatswain
+        images:
+            image1fail:pytest:
+                context: test\docker\windows\image1_fail
     """
 
 
