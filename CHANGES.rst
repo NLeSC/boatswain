@@ -6,10 +6,14 @@ This document records all notable changes to Boatswain.
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
-`NEXT`_
+`1.0.0`_
 -------
 
 * Fixed help text of push command
+* Fixed extraction of image id from docker response in some cases
+* Windows compatibility
+* Appveyor windows tests are passing
+
 
 `0.7.0`_ (2017-04-03)
 ----------
