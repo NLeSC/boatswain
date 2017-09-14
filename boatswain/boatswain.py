@@ -28,8 +28,6 @@ import posixpath
 import shlex
 import subprocess
 import sys
-import threading
-import sched, time
 
 import docker
 import progressbar
@@ -39,6 +37,7 @@ from .bcolors import bcolors
 from .errors import BuildError, ParseError
 from .util import extract_id, extract_step, find_dependencies
 from .dynamic_string_message import DynamicStringMessage
+from .timed_update import TimedUpdate
 
 
 class Boatswain(object):
@@ -70,7 +69,7 @@ class Boatswain(object):
 
         # Progress
         self.progress_bar = None
-        self.scheduler = sched.scheduler(time.time, time.sleep)
+        self.timer = None
         self.total = None
         self.step = None
 
@@ -254,7 +253,8 @@ class Boatswain(object):
                                   verbose=verbose):
                     if verbose == 1:
                         self.step += 1
-                        self.progress_bar.update(self.step, imagename=name)
+                        self.timer.step = self.step
+                        self.timer.imagename = name
                     built.append(name)
 
         self._stop_progress()
@@ -280,7 +280,8 @@ class Boatswain(object):
                 if self.clean_one(name, definition, dryrun=dryrun):
                     if verbose == 1:
                         self.step += 1
-                        self.progress_bar.update(self.step, imagename=name)
+                        self.timer.step = self.step
+                        self.timer.imagename = name
                     cleaned.append(name)
         self._stop_progress()
         return cleaned
@@ -306,7 +307,8 @@ class Boatswain(object):
                                  verbose=verbose):
                     if verbose == 1:
                         self.step += 1
-                        self.progress_bar.update(self.step, imagename=name)
+                        self.timer.step = self.step
+                        self.timer.imagename = name
                     pushed.append(name)
         self._stop_progress()
         return pushed
@@ -442,16 +444,6 @@ class Boatswain(object):
 
         return tag
 
-    def _update_progress(self):
-        """
-            Scheduled task to update progress bar every second
-        """
-        if not self.done:
-            if self.progress_bar:
-                self.progress_bar.update(self.step)
-
-                self.timer = self.scheduler.enter(1, 1, self._update_progress, argument=())
-
     def _stop_progress(self):
         """
             Stop all the progress related activities
@@ -462,8 +454,7 @@ class Boatswain(object):
             self.done = True
 
         if self.timer:
-            self.scheduler.cancel(self.timer)
-            self.timer = None
+            self.timer.done = True
 
     def _docker_progress(self, name, generator, has_step=True, verbose=1):
         # The build function returns a generator with what would normally
@@ -527,9 +518,11 @@ class Boatswain(object):
                     elif verbose > 1 and not has_step:
                         self.step += 1
 
-                    if verbose > 1:
+                    if verbose > 1 and self.progress_bar is None:
                         self.create_progress_bar(self.step, self.total, name)
-                        self.progress_bar.update(self.step, name)
+                    else:
+                        # Set the step, the timer will update the progress_bar
+                        self.timer.step = self.step
 
                     if line.startswith('Successfully built'):
                         ident = extract_id(line)
@@ -551,24 +544,25 @@ class Boatswain(object):
         """
             Initialize the progress bar
         """
-        if self.progress_bar is None:
-            self.done = False
-            self.step = start + 1
-            self.total = total + 1
-            if self.total is None:
-                self.total = progressbar.UnknownLength
-                widgets = [DynamicStringMessage('imagename'), ' ', Counter(), ' ',
-                           BouncingBar(marker=u'\u2588', left=u'\u2502', right=u'\u2502'),
-                           ' ', Timer()]
-            else:
-                widgets = [DynamicStringMessage('imagename'), ' ', Percentage(), ' (', SimpleProgress(), ')',
-                           ' ', Bar(marker=u'\u2588', left=u'\u2502', right=u'\u2502'),
-                           ' ', Timer()]
+        self.done = False
+        self.step = start + 1
+        self.total = total + 1
+        if self.total is None:
+            self.total = progressbar.UnknownLength
+            widgets = [DynamicStringMessage('imagename'), ' ', Counter(), ' ',
+                       BouncingBar(marker=u'\u2588', left=u'\u2502', right=u'\u2502'),
+                       ' ', Timer()]
+        else:
+            widgets = [DynamicStringMessage('imagename'), ' ', Percentage(), ' (', SimpleProgress(), ')',
+                       ' ', Bar(marker=u'\u2588', left=u'\u2502', right=u'\u2502'),
+                       ' ', Timer()]
 
-            self.progress_bar = progressbar.ProgressBar(
-                max_value=self.total, redirect_stdout=True,
-                redirect_stderr=True, widgets=widgets)
-            self.progress_bar.start()
-            self.progress_bar.update(self.step, imagename=name)
+        self.progress_bar = progressbar.ProgressBar(
+            max_value=self.total, redirect_stdout=True,
+            redirect_stderr=True, widgets=widgets)
+        self.progress_bar.start()
+        self.progress_bar.update(self.step, imagename=name)
 
-            self.timer = self.scheduler.enter(1, 1, self._update_progress, argument=())
+        self.timer = TimedUpdate(self.progress_bar, imagename=name)
+        self.timer.step = self.step
+        self.timer.start()
