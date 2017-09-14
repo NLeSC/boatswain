@@ -1,5 +1,5 @@
-.. image:: https://travis-ci.org/nlesc-sherlock/boatswain.svg?branch=master
-    :target: https://travis-ci.org/nlesc-sherlock/boatswain
+.. image:: https://travis-ci.org/NLeSC/boatswain.svg?branch=master
+    :target: https://travis-ci.org/NLeSC/boatswain
 .. image:: https://ci.appveyor.com/api/projects/status/5n7uj8ownch05e34/branch/master?svg=true
     :target: https://ci.appveyor.com/project/NLeSC/boatswain/branch/master
 
