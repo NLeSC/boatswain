@@ -2,8 +2,8 @@
     :target: https://travis-ci.org/NLeSC/boatswain
 .. image:: https://ci.appveyor.com/api/projects/status/5n7uj8ownch05e34/branch/master?svg=true
     :target: https://ci.appveyor.com/project/NLeSC/boatswain/branch/master
-.. image:: https://www.zenodo.org/badge/80722427.svg
-   :target: https://www.zenodo.org/badge/latestdoi/8072242
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1149011.svg
+   :target: https://doi.org/10.5281/zenodo.1149011
 
 Boatswain
 =========
