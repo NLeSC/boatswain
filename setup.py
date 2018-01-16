@@ -31,7 +31,7 @@ setup(
     ],
     extras_require={
         'registry': ['docker-registry-client>=0.5.1'],
-        'test': ['pytest', 'pytest-flake8', 'pytest-cov'],
+        'test': ['pytest>=3.0.0', 'pytest-flake8', 'pytest-cov'],
         'windows': ['pypiwin32']
     },
     author_email='b.weel@esiencecenter.nl',
@@ -47,10 +47,11 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
+	    'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Natural Language :: English',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
