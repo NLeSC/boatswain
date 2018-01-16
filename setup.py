@@ -31,7 +31,7 @@ setup(
     ],
     extras_require={
         'registry': ['docker-registry-client>=0.5.1'],
-        'test': ['pytest>=3.0.0', 'pytest-flake8', 'pytest-cov'],
+        'test': ['pytest>=3.2', 'pytest-flake8', 'pytest-cov'],
         'windows': ['pypiwin32']
     },
     author_email='b.weel@esiencecenter.nl',
