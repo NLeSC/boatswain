@@ -13,7 +13,8 @@
         }
     }, {
         "@type": "Person",
-        "givenName": "Jurriaan H.",
+        "additionalName": "H.",
+        "givenName": "Jurriaan",
         "familyName": "Spaaks",
         "affiliation": {
             "@type": "Organization",
