@@ -44,3 +44,40 @@ syntax, which is heavily based on docker-compose.
         image4:pytest:
             context: docker/image4
             tag: image12:pytest     # This image will be tagged with this
+
+::
+
+    $ boatswain build
+
+Extra Options
+=============
+-h
+    Display the options
+
+-q, --quiet
+    Don't display any output
+
+--dryrun
+    Do not actually execute the command, just go through the motions
+
+-b BOATSWAIN_FILE, ----boatswain_file BOATSWAIN_FILE
+    Override the default boatswain file (boatswain.yml)
+
+-f, --force
+    Force building the images, even if they already exist
+    (only for build)
+
+Debugging your build
+====================
+When your build does not go the way you expected boatswain
+can display some more information by using:
+
+-v
+    Verbose mode, displays a build progress for each image
+
+-vv
+    Very verbose mode, displays the output of the docker build process
+
+--debug
+    Debug mode, displays debug information of boatswain
+    as well as the output of the docker build process
