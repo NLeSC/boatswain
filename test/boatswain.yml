@@ -2,22 +2,22 @@ version: 1.0
 organisation: boatswain
 images:
     image1:pytest:
-        context: docker/image1
+        context: docker/linux/image1
     image2:pytest:
-        context: docker/image2
+        context: docker/linux/image2
         from: image1:pytest
     image3:pytest:
-        context: docker/image3
+        context: docker/linux/image3
         from: image2:pytest
         before:
             command:
-                - cp -u ../README.rst docker/image3/
+                - cp -u ../README.rst docker/linux/image3/
     image4:1.0:
-        context: docker/image4
+        context: docker/linux/image4
         tag: image12:pytest
     image4:2.0:
-        context: docker/image4
+        context: docker/linux/image4
     longimage:pytest:
-        context: docker/longimage
+        context: docker/linux/longimage
     image1_fail:pytest:
-        context: docker/image1_fail
+        context: docker/linux/image1_fail

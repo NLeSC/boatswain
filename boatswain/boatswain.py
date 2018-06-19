@@ -339,7 +339,13 @@ class Boatswain(object):
             if not dryrun:
                 if verbose > 1:
                     print("Running: ", args, " from directory ", os.getcwd())
-                subprocess.check_call(args, stdout=output, stderr=subprocess.PIPE)
+                try:
+                    subprocess.check_call(args, stdout=output, stderr=subprocess.PIPE)
+                except subprocess.CalledProcessError:
+                    print(bcolors.fail(
+                        """An exception occured during before command:\n{} from directory {}\nsee stack trace for details"""
+                        .format(args, os.getcwd())))
+                    raise
             else:
                 print(os.getcwd(), "> ", args)
 
@@ -367,6 +373,10 @@ class Boatswain(object):
 
         if 'before' in definition and 'command' in definition['before']:
             self.before_command(definition, verbose=verbose, dryrun=dryrun)
+        
+        if not os.path.exists(directory):
+            print(bcolors.fail("Context directory: {} does not exist!".format(directory)))
+            return False
 
         if not dryrun:
             try:
