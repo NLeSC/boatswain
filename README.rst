@@ -60,6 +60,7 @@ Cleaning
 You can clean the images that are defined in the boatswain file.
 
 ::
+
     $ boatswain clean
     
 Pushing
@@ -68,6 +69,7 @@ Pushing
 You can push the built images to dockerhub using the `push` command. It will be pushed to `organisation/imagetag` on dockerhub.
 
 ::
+
     $ boatswain push
 
 Extra Options
