@@ -343,7 +343,9 @@ class Boatswain(object):
                     subprocess.check_call(args, stdout=output, stderr=subprocess.PIPE)
                 except subprocess.CalledProcessError:
                     print(bcolors.fail(
-                        """An exception occured during before command:\n{} from directory {}\nsee stack trace for details"""
+                        """An exception occured during before command:\n{}\
+                        from directory {}\n\
+                        see stack trace for details"""
                         .format(args, os.getcwd())))
                     raise
             else:
@@ -373,7 +375,7 @@ class Boatswain(object):
 
         if 'before' in definition and 'command' in definition['before']:
             self.before_command(definition, verbose=verbose, dryrun=dryrun)
-        
+
         if not os.path.exists(directory):
             print(bcolors.fail("Context directory: {} does not exist!".format(directory)))
             return False
