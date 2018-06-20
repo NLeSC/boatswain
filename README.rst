@@ -45,9 +45,30 @@ syntax, which is heavily based on docker-compose.
             context: docker/image4
             tag: image12:pytest     # This image will be tagged with this
 
+Building
+--------
+
+You can build the images defined in the boatswain file using the following command. This invokes the docker build process for each image in the order so the dependencies are built before the dependent image.
+
 ::
 
     $ boatswain build
+
+Cleaning
+--------
+
+You can clean the images that are defined in the boatswain file.
+
+::
+    $ boatswain clean
+    
+Pushing
+-------
+
+You can push the built images to dockerhub using the `push` command. It will be pushed to `organisation/imagetag` on dockerhub.
+
+::
+    $ boatswain push
 
 Extra Options
 =============
@@ -60,7 +81,7 @@ Extra Options
 --dryrun
     Do not actually execute the command, just go through the motions
 
--b BOATSWAIN_FILE, ----boatswain_file BOATSWAIN_FILE
+-b <boatswain_file>, --boatswain_file <boatswain_file>
     Override the default boatswain file (boatswain.yml)
 
 -f, --force
