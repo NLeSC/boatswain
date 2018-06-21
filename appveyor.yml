@@ -46,9 +46,6 @@ build_script:
 install:
   - docker version
   - docker images -a
-  - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
-  - pip install coverage
-  - pip install codacy-coverage
   # Add python things to the path
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
 
