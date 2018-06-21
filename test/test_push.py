@@ -5,6 +5,7 @@ import pytest
 from boatswain import Boatswain
 
 
+@pytest.mark.skip(reason="Automatic testing of pushing is difficult")
 @pytest.mark.usefixtures("ensure_built")
 def test_push(bsfile):
     """
@@ -19,6 +20,7 @@ def test_push(bsfile):
                        "image1:pytest"], key=str.lower)
 
 
+@pytest.mark.skip(reason="Automatic testing of pushing is difficult")
 @pytest.mark.usefixtures("ensure_built")
 def test_push_dict(bsfile):
     """
@@ -31,6 +33,7 @@ def test_push_dict(bsfile):
                        "image1:pytest"], key=str.lower)
 
 
+@pytest.mark.skip(reason="Automatic testing of pushing is difficult")
 @pytest.mark.usefixtures("ensure_built")
 def test_push_up_to(bsfile):
     """
