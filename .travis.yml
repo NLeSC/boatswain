@@ -11,6 +11,11 @@ before_install:
   - docker version
 install:
   - pip install -U pip
+  - pip install coverage
+  - pip install codacy-coverage
   - pip install -e .[test]
 script:
   - py.test --flake8 $TESTS
+after_success:
+ - coverage xml
+ - python-codacy-coverage -r coverage.xml
