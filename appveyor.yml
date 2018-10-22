@@ -39,6 +39,14 @@ environment:
       PYTHON_VERSION: "3.6.x" # currently 3.6.1
       PYTHON_ARCH: "64"
 
+    - PYTHON: "C:\\Python34"
+      PYTHON_VERSION: "3.7.x" # currently 3.6.1
+      PYTHON_ARCH: "32"
+    
+    - PYTHON: "C:\\Python34-x64"
+      PYTHON_VERSION: "3.7.x" # currently 3.6.1
+      PYTHON_ARCH: "64"
+
 build_script:
   # Build the compiled extension
   - "%CMD_IN_ENV% pip install -e .[test,windows]"

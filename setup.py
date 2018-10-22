@@ -19,7 +19,7 @@ history = open('CHANGES.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='boatswain',
-    version='1.0.1',
+    version='1.0.2',
     url='https://github.com/nlesc-sherlock/boatswain',
     license='Apache Software License',
     author='Berend Weel',
@@ -51,6 +51,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Development Status :: 5 - Production/Stable',
         'Natural Language :: English',
         'Intended Audience :: Developers',
