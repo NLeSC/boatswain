@@ -113,7 +113,6 @@ def bsfile_fail():
     return yaml.load(boatswainfile)
 
 
-@pytest.fixture
 def image_names(file):
     """
         All image names fully qualified with their organisation

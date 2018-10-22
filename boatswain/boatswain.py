@@ -77,7 +77,7 @@ class Boatswain(object):
         else:
             # Should not having images be an exception?
             self.images = {}
-            self.logger.warn("No images defined in the boatswain description")
+            self.logger.warning("No images defined in the boatswain description")
 
     def __enter__(self):
         return self
@@ -110,7 +110,7 @@ class Boatswain(object):
 
     def _do_action(self, action, **kwargs):
         if not self.images:
-            self.logger.warn('No images defined in boatswain file')
+            self.logger.warning('No images defined in boatswain file')
             return []
         else:
             return self._do_action_dict(action, self.images, **kwargs)
@@ -205,7 +205,7 @@ class Boatswain(object):
         """
         self.logger.debug("build_up_to_dict: %s", images)
         if not images:
-            self.logger.warn('No images defined')
+            self.logger.warning('No images defined')
             return []
         elif name not in images:
             print(bcolors.fail("Cannot build undefined image " + name))
