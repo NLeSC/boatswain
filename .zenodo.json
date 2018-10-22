@@ -1,0 +1,21 @@
+{
+    "creators": [
+        {
+            "affiliation": "Netherlands eScience Center",
+            "name": "Weel, Berend"
+        },
+        {
+            "affiliation": "Netherlands eScience Center",
+            "name": "Spaaks, Jurriaan H."
+        }
+    ],
+    "keywords": [
+        "docker",
+        "docker-compose",
+        "containers"
+    ],
+    "license": {
+        "id": "Apache-2.0"
+    },
+    "title": "boatswain"
+}
