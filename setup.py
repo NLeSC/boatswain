@@ -32,7 +32,7 @@ setup(
     extras_require={
         'registry': ['docker-registry-client>=0.5.1'],
         'test': ['pytest>=3.5', 'pytest-flake8', 'pytest-cov'],
-        'windows': ['pypiwin32==224']
+        'windows': ['pywin32==224']
     },
     author_email='b.weel@esiencecenter.nl',
     description=(
