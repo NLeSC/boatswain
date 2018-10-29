@@ -6,8 +6,8 @@
     :target: https://www.codacy.com/app/b-weel/boatswain?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nlesc-sherlock/boatswain&amp;utm_campaign=Badge_Grade
 .. image:: https://api.codacy.com/project/badge/Coverage/67dac954463045d48541657bad72dcb2
     :target: https://www.codacy.com/app/b-weel/boatswain?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nlesc-sherlock/boatswain&amp;utm_campaign=Badge_Coverage
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1149011.svg
-    :target: https://doi.org/10.5281/zenodo.1149011
+.. image:: https://zenodo.org/badge/80722427.svg
+   :target: https://zenodo.org/badge/latestdoi/80722427
 
 Boatswain
 =========
