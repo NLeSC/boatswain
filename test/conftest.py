@@ -1,6 +1,8 @@
 """
     Shared fixtures for testing
 """
+from __future__ import unicode_literals
+
 from io import StringIO
 import posixpath
 import pytest
@@ -22,7 +24,7 @@ def boatswain_linux_file():
     """
         The shared boatswain file
     """
-    return u"""
+    return r"""
         version: 1.0
         organisation: boatswain
         images:
@@ -44,7 +46,7 @@ def boatswain_windows_file():
     """
         The shared boatswain file
     """
-    return u"""
+    return r"""
         version: 1.0
         organisation: boatswain
         images:
@@ -73,7 +75,7 @@ def boatswain_linux_failing_file():
     """
         A failing boatswain file
     """
-    return u"""
+    return r"""
         version: 1.0
         organisation: boatswain
         images:
@@ -88,7 +90,7 @@ def boatswain_windows_failing_file():
     """
         A failing boatswain file
     """
-    return u"""
+    return r"""
         version: 1.0
         organisation: boatswain
         images:

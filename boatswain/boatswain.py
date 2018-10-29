@@ -358,7 +358,7 @@ class Boatswain(object):
                     print("Running: ", args, " from directory ", os.getcwd())
                 try:
                     subprocess.check_call(args, stdout=output, stderr=subprocess.PIPE)
-                except subprocess.CalledProcessError as e:
+                except subprocess.CalledProcessError:
                     failure_string = "\n{} from directory {}\n".format(args, os.getcwd())
                     print(bcolors.fail("An exception occured during before command for ") +
                           bcolors.blue(name) +

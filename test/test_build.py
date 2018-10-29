@@ -3,6 +3,8 @@
 
     Currently tests only very basic things
 """
+from __future__ import unicode_literals
+
 import pytest
 import docker
 import platform
@@ -171,9 +173,9 @@ def test_clean(bsfile):
     """
     # Build an image by hand to remove
     client = docker.from_env()
-    path = "test/docker/linux/image1"
+    path = r"test/docker/linux/image1"
     if platform.system() == 'Windows':
-        path = "test\docker\windows\image1"
+        path = r"test\docker\windows\image1"
     client.images.build(path=path)
     with Boatswain(bsfile) as bosun:
         cleaned = bosun.clean()
