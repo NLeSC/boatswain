@@ -7,18 +7,21 @@ This document records all notable changes to Boatswain.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 
-`1.0.2`_
+`1.0.3`_
 * Added a non-zero exit code when a build fails
 * Added a build summary show succesful and non-succesfully built images
 * Added a keep-building (-k) command line argument
 * Building now stops at the first failed image by default
+
+`1.0.2`_
+* Correct citation.cff file
 
 `1.0.1`_
 --------
 * Fixed some packaging things
 
 `1.0.0`_
--------
+--------
 
 * Fixed help text of push command
 * Fixed extraction of image id from docker response in some cases
@@ -27,14 +30,15 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 
 `0.7.0`_ (2017-04-03)
-----------
+---------------------
 
-* Added a 'before' and 'command' key to the build definition. This is a list of commands that need to be staged into the context directory.
+* Added a 'before' and 'command' key to the build definition.
+  This is a list of commands that need to be staged into the context directory.
 * Default verbosity only shows 1 progress bar for all images
 * Changed progress indication to full white block
 
 `0.6.0`_ (2017-03-09)
---------------------
+---------------------
 
 * Added the tree command which will print the tree of the boatswain file
 * Added quiet and extra verbose modes
@@ -88,3 +92,4 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 .. _1.0.0: https://github.com/nlesc-sherlock/boatswain/compare/0.7.0...1.0.0
 .. _1.0.1: https://github.com/nlesc-sherlock/boatswain/compare/1.0.0...1.0.1
 .. _1.0.2: https://github.com/nlesc-sherlock/boatswain/compare/1.0.1...1.0.2
+.. _1.0.3: https://github.com/nlesc-sherlock/boatswain/compare/1.0.2...1.0.3
