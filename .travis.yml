@@ -18,7 +18,7 @@ install:
   - pip install codacy-coverage
   - pip install -e .[test]
 script:
-  - py.test --flakes --codestyle --cov=boatswain $TESTS
+  - py.test --flake8 --cov=boatswain $TESTS
 after_success:
  - coverage xml
  - python-codacy-coverage -r coverage.xml
