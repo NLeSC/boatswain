@@ -239,12 +239,9 @@ class Boatswain(object):
             # Make sure all the dependencies have been built
             if 'from' in definition and definition['from'] not in self.cache:
                 if definition['from'] not in names:
-                    print(bcolors.fail
-                          (
-                              "Error: could not find a recipe to build "
-                          ) +
-                          bcolors.blue(definition['from']) +
-                          bcolors.fail(" which is needed for ") +
+                    print(bcolors.fail("Error: could not find a recipe to build"),
+                          bcolors.blue(definition['from']),
+                          bcolors.fail("which is needed for"),
                           bcolors.blue(name) + "\n", file=sys.stderr)
                     # do not append this image
                 else:
