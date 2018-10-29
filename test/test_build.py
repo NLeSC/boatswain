@@ -43,11 +43,11 @@ def test_build_verbose(bsfile):
 
 
 @pytest.mark.usefixtures("ensure_clean")
-def test_build_failing(bsfile_fail):
+def test_build_failing(bsfile_single_fail):
     """
         Test exception when building image fails
     """
-    with Boatswain(bsfile_fail) as bosun:
+    with Boatswain(bsfile_single_fail) as bosun:
         built = bosun.build()
         assert not built['images']
 

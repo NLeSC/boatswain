@@ -117,6 +117,17 @@ def bsfile_fail():
     return yaml.load(boatswainfile)
 
 
+@pytest.fixture
+def bsfile_single_fail():
+    """
+        Failing boatswain file wiht only a single image
+    """
+    boatswainfile = StringIO(boatswain_failing_file())
+    f = yaml.load(boatswainfile)
+    del f['images']['image1:pytest']
+    return f
+
+
 def image_names(file):
     """
         All image names fully qualified with their organisation
