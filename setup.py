@@ -24,6 +24,7 @@ setup(
     license='Apache Software License',
     author='Berend Weel',
     install_requires=[
+        'setuptools >= 30',
         'docker>=2.0.0, <3.0.0',
         'PyYAML>=3.12, <4.0',
         'progressbar2>=3.16.0, <4.0.0',
