@@ -14,7 +14,7 @@ def test_file(bsfile):
         Test creating the Boatswain object
     """
     # Should not throw an exception
-    with Boatswain(bsfile) as bosun:  # NOQA
+    with Boatswain(bsfile):  # NOQA
         pass
 
 
@@ -154,7 +154,7 @@ def test_build_no_organisation(bsfile):
     """
     del bsfile['organisation']
     with pytest.raises(Exception):
-        with Boatswain(bsfile) as bosun:  # NOQA
+        with Boatswain(bsfile):  # NOQA
             pass
 
 

@@ -80,6 +80,9 @@ Extra Options
 -q, --quiet
     Don't display any output
 
+-k, --keep_building
+    Keep building images even if an error occurs
+
 --dryrun
     Do not actually execute the command, just go through the motions
 

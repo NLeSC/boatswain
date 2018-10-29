@@ -51,4 +51,4 @@ install:
 
 test_script:
   # Run the project tests
-  - "%CMD_IN_ENV% py.test --flakes --cov=boatswain test/"
+  - "%CMD_IN_ENV% py.test --flakes --codestyle --cov=boatswain test/"
