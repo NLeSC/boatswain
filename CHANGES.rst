@@ -7,6 +7,12 @@ This document records all notable changes to Boatswain.
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
 
+`1.0.2`_
+* Added a non-zero exit code when a build fails
+* Added a build summary show succesful and non-succesfully built images
+* Added a keep-building (-k) command line argument
+* Building now stops at the first failed image by default
+
 `1.0.1`_
 --------
 * Fixed some packaging things
@@ -79,3 +85,6 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 .. _0.5.1: https://github.com/nlesc-sherlock/boatswain/compare/0.5.0...0.5.1
 .. _0.6.0: https://github.com/nlesc-sherlock/boatswain/compare/0.5.1...0.6.0
 .. _0.7.0: https://github.com/nlesc-sherlock/boatswain/compare/0.6.0...0.7.0
+.. _1.0.0: https://github.com/nlesc-sherlock/boatswain/compare/0.7.0...1.0.0
+.. _1.0.1: https://github.com/nlesc-sherlock/boatswain/compare/1.0.0...1.0.1
+.. _1.0.2: https://github.com/nlesc-sherlock/boatswain/compare/1.0.1...1.0.2

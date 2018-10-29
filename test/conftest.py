@@ -79,6 +79,8 @@ def boatswain_linux_failing_file():
         images:
             image1fail:pytest:
                 context: test/docker/linux/image1_fail
+            image1:pytest:
+                context: test/docker/linux/image1
     """
 
 
@@ -92,6 +94,8 @@ def boatswain_windows_failing_file():
         images:
             image1fail:pytest:
                 context: test\docker\windows\image1_fail
+            image1:pytest:
+                context: test\docker\windows\image1
     """
 
 

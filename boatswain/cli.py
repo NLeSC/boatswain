@@ -42,6 +42,10 @@ def argparser():
         action='store_true'
     )
     common.add_argument(
+        '-k', '--keep_building', help="Keep building even if errors occur",
+        action='store_true'
+    )
+    common.add_argument(
         '--dryrun', help="Do a dry run don't actually build",
         action='store_true'
     )
@@ -120,6 +124,30 @@ def exit_with_message(message, number):
     sys.exit(number)
 
 
+def print_summary(result, command):
+
+    print(bcolors.header("\nBuild summary"))
+    if command == 'build':
+        verbed = 'built'
+    else:
+        verbed = command + 'ed'
+
+    print(bcolors.blue(verbed + ':'))
+    for image in result['images']:
+        print('    ' + image)
+
+    if not result['success']:
+        print(bcolors.fail('Failed to ' + command + ':'))
+        for image in result['failed']:
+            print('    ' + image)
+
+    if result['success']:
+        final = bcolors.green('success')
+    else:
+        final = bcolors.fail('failure')
+    print("Final result was deemed a: " + final)
+
+
 def main():
     """
         Run the boatswain command using the given arguments
@@ -144,35 +172,42 @@ def main():
     except IOError as error:
         exit_with_message(error.filename + ": " + error.strerror, -error.errno)
 
-    with Boatswain(bsfile) as bosun:
+    verbosity_level = 1     # standard verbosity
+    if arguments.quiet:
+        verbosity_level = 0
+    elif arguments.verbose:
+        verbosity_level = 2
+    elif arguments.verboseverbose:
+        verbosity_level = 3
 
-        verbosity_level = 1     # standard verbosity
-        if arguments.quiet:
-            verbosity_level = 0
-        elif arguments.verbose:
-            verbosity_level = 2
-        elif arguments.verboseverbose:
-            verbosity_level = 3
-
-        if command == 'build':
+    with Boatswain(bsfile,
+                   verbose=verbosity_level,
+                   continue_building=arguments.keep_building) as bosun:
+        if command == 'tree':
+            tree = Tree()
+            tree.print_boatswain_tree(bsfile)
+            sys.exit(0)
+        elif command == 'build':
             if arguments.imagename:
-                bosun.build_up_to(arguments.imagename, dryrun=arguments.dryrun,
-                                  verbose=verbosity_level, force=arguments.force)
+                result = bosun.build_up_to(arguments.imagename, dryrun=arguments.dryrun, force=arguments.force)
             else:
-                bosun.build(dryrun=arguments.dryrun, verbose=verbosity_level,
-                            force=arguments.force)
+                result = bosun.build(dryrun=arguments.dryrun, force=arguments.force)
+
         elif command == 'clean':
             if arguments.imagename:
-                bosun.clean_up_to(arguments.imagename, dryrun=arguments.dryrun)
+                result = bosun.clean_up_to(arguments.imagename, dryrun=arguments.dryrun)
             else:
-                bosun.clean(dryrun=arguments.dryrun)
+                result = bosun.clean(dryrun=arguments.dryrun)
 
         elif command == 'push':
             if arguments.imagename:
-                bosun.push_up_to(arguments.imagename, dryrun=arguments.dryrun,
-                                 verbose=verbosity_level)
+                result = bosun.push_up_to(arguments.imagename, dryrun=arguments.dryrun)
             else:
-                bosun.push(dryrun=arguments.dryrun, verbose=verbosity_level)
-        elif command == 'tree':
-            tree = Tree()
-            tree.print_boatswain_tree(bsfile)
+                result = bosun.push(dryrun=arguments.dryrun)
+
+    if verbosity_level >= 1:
+        print_summary(result, command)
+    if result['success']:
+        sys.exit(0)
+    else:
+        sys.exit(1)

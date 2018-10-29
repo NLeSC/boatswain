@@ -25,7 +25,7 @@ def test_build(bsfile):
     """
     with Boatswain(bsfile) as bosun:
         built = bosun.build()
-        assert sorted(built, key=str.lower) \
+        assert sorted(built['images'], key=str.lower) \
             == sorted(["image4:pytest", "image3:pytest", "image2:pytest",
                        "image1:pytest"], key=str.lower)
 
@@ -35,9 +35,9 @@ def test_build_verbose(bsfile):
     """
         Test exception when there are no images in the file
     """
-    with Boatswain(bsfile) as bosun:
-        built = bosun.build(verbose=True)
-        assert sorted(built, key=str.lower) \
+    with Boatswain(bsfile, verbose=2) as bosun:
+        built = bosun.build()
+        assert sorted(built['images'], key=str.lower) \
             == sorted(["image4:pytest", "image3:pytest", "image2:pytest",
                        "image1:pytest"], key=str.lower)
 
@@ -49,7 +49,18 @@ def test_build_failing(bsfile_fail):
     """
     with Boatswain(bsfile_fail) as bosun:
         built = bosun.build()
-        assert not built
+        assert not built['images']
+
+
+@pytest.mark.usefixtures("ensure_clean")
+def test_build_failing_continue(bsfile_fail):
+    """
+        Test exception when building image fails, but keep building the next
+    """
+    with Boatswain(bsfile_fail, continue_building=True) as bosun:
+        built = bosun.build()
+        assert sorted(built['images'], key=str.lower) \
+            == sorted(["image1:pytest"], key=str.lower)
 
 
 @pytest.mark.usefixtures("ensure_clean")
@@ -59,7 +70,7 @@ def test_build_up_to(bsfile):
     """
     with Boatswain(bsfile) as bosun:
         built = bosun.build_up_to("image3:pytest", dryrun=True)
-        assert sorted(built, key=str.lower) \
+        assert sorted(built['images'], key=str.lower) \
             == sorted(["image3:pytest", "image2:pytest",
                        "image1:pytest"], key=str.lower)
 
@@ -71,7 +82,7 @@ def test_build_dict(bsfile):
     """
     with Boatswain(bsfile) as bosun:
         built = bosun.build_dict(bsfile['images'])
-        assert sorted(built, key=str.lower) \
+        assert sorted(built['images'], key=str.lower) \
             == sorted(["image4:pytest", "image3:pytest", "image2:pytest",
                        "image1:pytest"], key=str.lower)
 
@@ -83,7 +94,7 @@ def test_build_no_images(bsfile):
     del bsfile['images']
     with Boatswain(bsfile) as bosun:
         built = bosun.build()
-        assert built == []
+        assert built['images'] == []
 
 
 def test_build_missing_dependency(bsfile):
@@ -93,7 +104,7 @@ def test_build_missing_dependency(bsfile):
     del bsfile['images']['image1:pytest']
     with Boatswain(bsfile) as bosun:
         built = bosun.build()
-        assert built == ["image4:pytest"]
+        assert built['images'] == ["image4:pytest"]
 
 
 def test_build_missing_context(bsfile):
@@ -113,7 +124,7 @@ def test_build_up_to_no_images(bsfile):
     del bsfile['images']
     with Boatswain(bsfile) as bosun:
         built = bosun.build_up_to("image3:pytest")
-        assert built == []
+        assert built['images'] == []
 
 
 def test_build_dict_no_images(bsfile):
@@ -123,7 +134,8 @@ def test_build_dict_no_images(bsfile):
     del bsfile['images']
     with Boatswain(bsfile) as bosun:
         built = bosun.build_dict({})
-        assert built == []
+        print(built)
+        assert built['images'] == []
 
 
 def test_build_up_to_dict_no_images(bsfile):
@@ -133,7 +145,7 @@ def test_build_up_to_dict_no_images(bsfile):
     del bsfile['images']
     with Boatswain(bsfile) as bosun:
         built = bosun.build_up_to_dict("image3:pytest", {})
-        assert built == []
+        assert built['images'] == []
 
 
 def test_build_no_organisation(bsfile):
@@ -165,7 +177,7 @@ def test_clean(bsfile):
     client.images.build(path=path)
     with Boatswain(bsfile) as bosun:
         cleaned = bosun.clean()
-        assert cleaned
+        assert cleaned['images']
 
 
 def test_clean_no_images(bsfile):
@@ -177,7 +189,7 @@ def test_clean_no_images(bsfile):
     del bsfile['images']
     with Boatswain(bsfile) as bosun:
         cleaned = bosun.clean()
-        assert not cleaned
+        assert not cleaned['images']
 
 
 @pytest.mark.usefixtures("ensure_built")
@@ -187,7 +199,7 @@ def test_clean_up_to(bsfile):
     """
     with Boatswain(bsfile) as bosun:
         cleaned = bosun.clean_up_to("image3:pytest")
-        assert sorted(cleaned, key=str.lower) \
+        assert sorted(cleaned['images'], key=str.lower) \
             == sorted(["image3:pytest", "image2:pytest", "image1:pytest"],
                       key=str.lower)
 
@@ -200,7 +212,7 @@ def test_clean_up_to_no_images(bsfile):
     del bsfile['images']
     with Boatswain(bsfile) as bosun:
         cleaned = bosun.clean_up_to("image3:pytest")
-        assert not cleaned
+        assert not cleaned['images']
 
 
 @pytest.mark.usefixtures("ensure_built")
@@ -211,7 +223,7 @@ def test_clean_dict(bsfile):
     del bsfile['images']
     with Boatswain(bsfile) as bosun:
         cleaned = bosun.clean_dict({})
-        assert not cleaned
+        assert not cleaned['images']
 
 
 @pytest.mark.usefixtures("ensure_built")
@@ -222,4 +234,4 @@ def test_clean_up_to_dict(bsfile):
     del bsfile['images']
     with Boatswain(bsfile) as bosun:
         cleaned = bosun.clean_up_to_dict("image3:pytest", {})
-        assert not cleaned
+        assert not cleaned['images']
