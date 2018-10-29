@@ -22,7 +22,7 @@ def boatswain_linux_file():
     """
         The shared boatswain file
     """
-    return """
+    return u"""
         version: 1.0
         organisation: boatswain
         images:
@@ -44,7 +44,7 @@ def boatswain_windows_file():
     """
         The shared boatswain file
     """
-    return """
+    return u"""
         version: 1.0
         organisation: boatswain
         images:
@@ -73,7 +73,7 @@ def boatswain_linux_failing_file():
     """
         A failing boatswain file
     """
-    return """
+    return u"""
         version: 1.0
         organisation: boatswain
         images:
@@ -88,7 +88,7 @@ def boatswain_windows_failing_file():
     """
         A failing boatswain file
     """
-    return """
+    return u"""
         version: 1.0
         organisation: boatswain
         images:
