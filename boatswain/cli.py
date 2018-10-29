@@ -110,20 +110,6 @@ def argparser():
     return parser
 
 
-def exit_with_message(message, number):
-    """
-        Exit nicely with a pretty colored message
-    """
-    if message:
-        if number < 0:
-            print(bcolors.fail(message))
-        elif number > 0:
-            print(bcolors.warning(message))
-        else:
-            print(bcolors.green(message))
-    sys.exit(number)
-
-
 def print_summary(result, command):
 
     print(bcolors.header("\nBuild summary"))
@@ -155,7 +141,7 @@ def main():
     parser = argparser()
     if len(sys.argv) < 1:
         parser.print_help()
-        exit_with_message("", 1)
+        sys.exit(1)
 
     arguments = parser.parse_args()
 
@@ -170,7 +156,8 @@ def main():
         with open(arguments.boatswain_file) as yamlfile:
             bsfile = yaml.load(yamlfile)
     except IOError as error:
-        exit_with_message(error.filename + ": " + error.strerror, -error.errno)
+        print(bcolors.fail(error.filename + ": " + error.strerror))
+        sys.exit(-error.errno)
 
     verbosity_level = 1     # standard verbosity
     if arguments.quiet:

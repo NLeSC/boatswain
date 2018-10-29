@@ -1,4 +1,6 @@
+import pytest
 from boatswain import argparser
+from boatswain.cli import main
 
 
 def test_image():
@@ -20,3 +22,8 @@ def test_verbose():
     args = parser.parse_args('build -v'.split())
 
     assert args.verbose
+
+
+def test_empty_args():
+    with pytest.raises(SystemExit):
+        main()
