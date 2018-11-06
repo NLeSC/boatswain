@@ -2,10 +2,8 @@
     :target: https://travis-ci.org/NLeSC/boatswain
 .. image:: https://ci.appveyor.com/api/projects/status/5n7uj8ownch05e34/branch/master?svg=true
     :target: https://ci.appveyor.com/project/NLeSC/boatswain/branch/master
-.. image:: https://api.codacy.com/project/badge/Grade/67dac954463045d48541657bad72dcb2
-    :target: https://www.codacy.com/app/b-weel/boatswain?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nlesc-sherlock/boatswain&amp;utm_campaign=Badge_Grade
-.. image:: https://api.codacy.com/project/badge/Coverage/67dac954463045d48541657bad72dcb2
-    :target: https://www.codacy.com/app/b-weel/boatswain?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nlesc-sherlock/boatswain&amp;utm_campaign=Badge_Coverage
+.. image:: https://api.codacy.com/project/badge/Grade/3271fedeb94b4d8ba24273d9cba0c852
+    :target: https://www.codacy.com/app/NLeSC/boatswain?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=NLeSC/boatswain&amp;utm_campaign=Badge_Grade
 .. image:: https://zenodo.org/badge/80722427.svg
    :target: https://zenodo.org/badge/latestdoi/80722427
 
