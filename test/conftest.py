@@ -105,7 +105,7 @@ def bsfile():
         Shared boatswain file loaded using yaml
     """
     boatswainfile = StringIO(boatswain_file())
-    return yaml.load(boatswainfile)
+    return yaml.safe_load(boatswainfile)
 
 
 @pytest.fixture
@@ -114,7 +114,7 @@ def bsfile_fail():
         Failing boatswain file loaded using yaml
     """
     boatswainfile = StringIO(boatswain_failing_file())
-    return yaml.load(boatswainfile)
+    return yaml.safe_load(boatswainfile)
 
 
 @pytest.fixture
@@ -123,7 +123,7 @@ def bsfile_single_fail():
         Failing boatswain file wiht only a single image
     """
     boatswainfile = StringIO(boatswain_failing_file())
-    f = yaml.load(boatswainfile)
+    f = yaml.safe_load(boatswainfile)
     del f['images']['image1:pytest']
     return f
 

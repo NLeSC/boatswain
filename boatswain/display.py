@@ -86,7 +86,7 @@ class Tree(object):
         if not node:
             return
         else:
-            if node.label is not 'root':
+            if node.label != 'root':
                 for l in last[:-1]:
                     if l:
                         print(self._space, end="")

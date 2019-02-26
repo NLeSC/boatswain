@@ -154,7 +154,7 @@ def main():
     command = arguments.command
     try:
         with open(arguments.boatswain_file) as yamlfile:
-            bsfile = yaml.load(yamlfile)
+            bsfile = yaml.safe_load(yamlfile)
     except IOError as error:
         print(bcolors.fail(error.filename + ": " + error.strerror))
         sys.exit(-error.errno)
