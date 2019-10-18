@@ -12,7 +12,7 @@ class DynamicStringMessage(Variable):
         if len(name.split()) > 1:
             raise ValueError('DynamicStringMessage(): argument must be single word')
 
-        super().__init__(name, min_width=3, **kwargs)
+        super(DynamicStringMessage, self).__init__(name, min_width=3, **kwargs)
 
     def __call__(self, progress, data):
         val = data['dynamic_messages'][self.name]
