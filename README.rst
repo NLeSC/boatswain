@@ -50,7 +50,9 @@ syntax, which is heavily based on docker-compose.
 Building
 --------
 
-You can build the images defined in the boatswain file using the following command. This invokes the docker build process for each image in the order so the dependencies are built before the dependent image.
+You can build the images defined in the boatswain file using the following
+command. This invokes the docker build process for each image in the order
+so the dependencies are built before the dependent image.
 
 ::
 
@@ -64,11 +66,12 @@ You can clean the images that are defined in the boatswain file.
 ::
 
     $ boatswain clean
-    
+
 Pushing
 -------
 
-You can push the built images to dockerhub using the `push` command. It will be pushed to `organisation/imagetag` on dockerhub.
+You can push the built images to dockerhub using the `push` command.
+It will be pushed to `organisation/imagetag` on dockerhub.
 
 ::
 

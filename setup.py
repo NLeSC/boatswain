@@ -35,6 +35,7 @@ setup(
     author_email='b.weel@esiencecenter.nl',
     description=('Yaml based way to build Docker images.'),
     long_description=readme + '\n\n' + history,
+    long_description_content_type='text/x-rst',
     packages=find_packages(),
     include_package_data=True,
     platforms='any',
