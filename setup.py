@@ -8,8 +8,8 @@ from setuptools import find_packages, setup
 
 def read(*names, **kwargs):
     with io.open(
-        os.path.join(os.path.dirname(__file__), *names),
-        encoding=kwargs.get('encoding', 'utf8'),
+            os.path.join(os.path.dirname(__file__), *names),
+            encoding=kwargs.get('encoding', 'utf8'),
     ) as fp:
         return fp.read()
 
@@ -19,30 +19,21 @@ history = open('CHANGES.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='boatswain',
-    version='1.0.3',
+    version='1.0.4',
     url='https://github.com/nlesc-sherlock/boatswain',
     license='Apache Software License',
     author='Berend Weel',
     install_requires=[
-        'setuptools >= 30',
-        'docker>=2.0.0, <3.0.0',
-        'PyYAML>=4.2b1',
-        'progressbar2>=3.16.0, <4.0.0',
+        'setuptools >= 30', 'docker>=3.0.0, <5.0.0', 'PyYAML>=4.2b1', 'progressbar2>=3.16.0, <4.0.0',
         'six>=1.10.0, <2.0.0'
     ],
     extras_require={
         'registry': ['docker-registry-client>=0.5.1'],
-        'test': [
-            'pytest>=3.5',
-            'pytest-flake8',
-            'pytest-cov'
-        ],
+        'test': ['pytest', 'pytest-flake8', 'pytest-cov'],
         'windows': ['pywin32==224']
     },
     author_email='b.weel@esiencecenter.nl',
-    description=(
-        'Yaml based way to build Docker images.'
-    ),
+    description=('Yaml based way to build Docker images.'),
     long_description=readme + '\n\n' + history,
     packages=find_packages(),
     include_package_data=True,

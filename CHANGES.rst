@@ -6,6 +6,8 @@ This document records all notable changes to Boatswain.
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+`1.0.4`_
+* Updated dynamic string message to variable
 
 `1.0.3`_
 * Added a non-zero exit code when a build fails
@@ -51,7 +53,8 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 ---------------------
 
 * Implemented push command
-* Build will now greedily try to build images instead of throwing an exception at the first error.
+* Build will now greedily try to build images instead of throwing an
+  exception at the first error.
 * Added error messages to failing builds
 * Standardized return values (e.g. always a list)
 * Refactored to reduce code duplication in boatswain class
@@ -93,3 +96,4 @@ This project adheres to `Semantic Versioning <http://semver.org/>`_.
 .. _1.0.1: https://github.com/nlesc-sherlock/boatswain/compare/1.0.0...1.0.1
 .. _1.0.2: https://github.com/nlesc-sherlock/boatswain/compare/1.0.1...1.0.2
 .. _1.0.3: https://github.com/nlesc-sherlock/boatswain/compare/1.0.2...1.0.3
+.. _1.0.4: https://github.com/nlesc-sherlock/boatswain/compare/1.0.3...1.0.4
