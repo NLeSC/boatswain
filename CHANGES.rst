@@ -5,6 +5,11 @@ This document records all notable changes to Boatswain.
 
 This project adheres to `Semantic Versioning <http://semver.org/>`_.
 
+`Unreleased`
+------------
+* Removed python 2 and 3.4 tests
+* Python 2 support will no longer be actively maintained
+
 `1.0.4`_
 --------
 * Updated dynamic string message to variable
