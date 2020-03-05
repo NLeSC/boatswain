@@ -4,7 +4,7 @@
    :target: https://github.com/nlesc/boatswain
 .. image:: https://img.shields.io/github/license/NLeSC/boatswain
    :target: https://github.com/nlesc/boatswain
-.. image:: https://img.shields.io/badge/rsd-PSSMGen-00a3e3.svg?labelColor=gray&color=00a3e3
+.. image:: https://img.shields.io/badge/rsd-boatswain-00a3e3.svg?labelColor=gray&color=00a3e3
    :target: https://research-software.nl/software/boatswain
 .. image:: https://img.shields.io/pypi/v/pssmgen
    :target: https://pypi.org/project/pssmgen/
@@ -23,7 +23,7 @@ Boatswain
 =========
 Boatswain is a simple build system for docker images.
 
-It is especially usefull when you have multiple docker images that
+It is especially useful when you have multiple docker images that
 depend on each other.
 
 
