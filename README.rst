@@ -6,6 +6,8 @@
     :target: https://www.codacy.com/app/NLeSC/boatswain?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=NLeSC/boatswain&amp;utm_campaign=Badge_Grade
 .. image:: https://zenodo.org/badge/80722427.svg
    :target: https://zenodo.org/badge/latestdoi/80722427
+.. image:: https://bestpractices.coreinfrastructure.org/projects/1811/badge
+    :target: https://bestpractices.coreinfrastructure.org/projects/1811
 
 Boatswain
 =========
