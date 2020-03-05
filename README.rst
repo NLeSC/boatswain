@@ -1,13 +1,23 @@
+.. image:: https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue
+   :target: https://github.com/nlesc/boatswain
+.. image:: https://img.shields.io/github/last-commit/NLeSC/boatswain
+   :target: https://github.com/nlesc/boatswain
+.. image:: https://img.shields.io/github/license/NLeSC/boatswain
+   :target: https://github.com/nlesc/boatswain
+.. image:: https://img.shields.io/badge/rsd-PSSMGen-00a3e3.svg&labelColor=gray&color=00a3e3
+   :target: https://research-software.nl/software/boatswain
+.. image:: https://img.shields.io/pypi/v/pssmgen
+   :target: https://pypi.org/project/pssmgen/
+.. image:: https://zenodo.org/badge/80722427.svg
+   :target: https://zenodo.org/badge/latestdoi/80722427
+.. image:: https://bestpractices.coreinfrastructure.org/projects/3758/badge
+    :target: https://bestpractices.coreinfrastructure.org/projects/3758
 .. image:: https://travis-ci.org/NLeSC/boatswain.svg?branch=master
     :target: https://travis-ci.org/NLeSC/boatswain
 .. image:: https://ci.appveyor.com/api/projects/status/5n7uj8ownch05e34/branch/master?svg=true
     :target: https://ci.appveyor.com/project/NLeSC/boatswain/branch/master
 .. image:: https://api.codacy.com/project/badge/Grade/3271fedeb94b4d8ba24273d9cba0c852
     :target: https://www.codacy.com/app/NLeSC/boatswain?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=NLeSC/boatswain&amp;utm_campaign=Badge_Grade
-.. image:: https://zenodo.org/badge/80722427.svg
-   :target: https://zenodo.org/badge/latestdoi/80722427
-.. image:: https://bestpractices.coreinfrastructure.org/projects/3758/badge
-    :target: https://bestpractices.coreinfrastructure.org/projects/3758
 
 Boatswain
 =========
