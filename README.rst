@@ -4,7 +4,7 @@
    :target: https://github.com/nlesc/boatswain
 .. image:: https://img.shields.io/github/license/NLeSC/boatswain
    :target: https://github.com/nlesc/boatswain
-.. image:: https://img.shields.io/badge/rsd-PSSMGen-00a3e3.svg&labelColor=gray&color=00a3e3
+.. image:: https://img.shields.io/badge/rsd-PSSMGen-00a3e3.svg?labelColor=gray&color=00a3e3
    :target: https://research-software.nl/software/boatswain
 .. image:: https://img.shields.io/pypi/v/pssmgen
    :target: https://pypi.org/project/pssmgen/
