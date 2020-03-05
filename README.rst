@@ -6,8 +6,8 @@
    :target: https://github.com/nlesc/boatswain
 .. image:: https://img.shields.io/badge/rsd-boatswain-00a3e3.svg?labelColor=gray&color=00a3e3
    :target: https://research-software.nl/software/boatswain
-.. image:: https://img.shields.io/pypi/v/pssmgen
-   :target: https://pypi.org/project/pssmgen/
+.. image:: https://img.shields.io/pypi/v/boatswain
+   :target: https://pypi.org/project/boatswain/
 .. image:: https://zenodo.org/badge/80722427.svg
    :target: https://zenodo.org/badge/latestdoi/80722427
 .. image:: https://bestpractices.coreinfrastructure.org/projects/3758/badge
